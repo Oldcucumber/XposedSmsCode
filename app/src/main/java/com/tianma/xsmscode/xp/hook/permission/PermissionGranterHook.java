@@ -19,6 +19,13 @@ public class PermissionGranterHook extends BaseHook {
             ClassLoader classLoader = lpparam.classLoader;
 
             final int sdkInt = Build.VERSION.SDK_INT;
+            if (sdkInt >= 35) {
+                try {
+                    if (!PermissionServiceHook35.install(classLoader))
+                        com.tianma.xsmscode.common.utils.XLog.e("Unsupported permission service; optional actions may be unavailable");
+                } catch (Throwable e) { com.tianma.xsmscode.common.utils.XLog.e("Permission adaptation unavailable", e); }
+                return;
+            }
             if (sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 new PermissionManagerServiceHook34(classLoader).startHook();
             } else if (sdkInt >= Build.VERSION_CODES.TIRAMISU){ // Android 13+
