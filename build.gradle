@@ -5,6 +5,10 @@ buildscript {
 allprojects {
     repositories {
         google()
+        maven {
+            url 'https://maven.aliyun.com/repository/public/'
+            content { includeGroup 'org.hamcrest'; includeGroup 'junit' }
+        }
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
