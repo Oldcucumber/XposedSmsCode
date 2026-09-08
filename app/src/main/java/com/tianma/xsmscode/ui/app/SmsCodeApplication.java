@@ -28,6 +28,8 @@ public class SmsCodeApplication extends DaggerApplication {
     public void onCreate() {
         super.onCreate();
         com.tianma.xsmscode.common.utils.StorageUtils.init(this);
+        try { com.tianma.xsmscode.feature.migrate.LegacyUpgrade.run(this); }
+        catch (java.io.IOException e) { com.tianma.xsmscode.common.utils.XLog.e("Retained-data migration needs retry", e); }
         Cyanea.init(this, super.getResources());
         if (!Cyanea.getInstance().isThemeModified()) {
             Cyanea.getInstance().edit()

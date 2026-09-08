@@ -32,38 +32,26 @@ public class CodeRecordRestoreManager {
      * Import code records to database
      */
     public static boolean importToDatabase(Context context) {
+        File[] files = getRecordFiles();
+        if (files == null || files.length == 0) return true;
+        android.database.sqlite.SQLiteDatabase db = DBManager.get(context).getSQLiteDatabase();
         try {
-            File[] recordFiles = getRecordFiles();
-
-            List<SmsMsg> smsMsgList = new ArrayList<>();
-            for (File recordFile : recordFiles) {
-                SmsMsg smsMsg = loadFromFile(recordFile);
-                if (smsMsg != null) {
-                    smsMsgList.add(smsMsg);
-                    recordFile.delete();
-                }
-            }
-
-            if (!smsMsgList.isEmpty()) {
-                DBManager dbManager = DBManager.get(context);
-                dbManager.addSmsMsgList(smsMsgList);
-                XLog.d("Import code records to database succeed");
-
-                List<SmsMsg> allMsgList = dbManager.queryAllSmsMsg();
-                if (allMsgList.size() > PrefConst.MAX_SMS_RECORDS_COUNT_DEFAULT) {
-                    List<SmsMsg> outdatedMsgList = new ArrayList<>();
-                    for (int i = PrefConst.MAX_SMS_RECORDS_COUNT_DEFAULT; i < allMsgList.size(); i++) {
-                        outdatedMsgList.add(allMsgList.get(i));
+            db.beginTransaction();
+            try {
+                for (File file : files) {
+                    SmsMsg msg = loadFromFile(file);
+                    if (msg == null || msg.getSender() == null || msg.getBody() == null) throw new IllegalArgumentException("Invalid pending record");
+                    try (android.database.Cursor c = db.query("SMS_MSG", new String[]{"_id"}, "SENDER=? AND BODY=? AND DATE=?",
+                            new String[]{msg.getSender(), msg.getBody(), Long.toString(msg.getDate())}, null, null, null)) {
+                        if (!c.moveToFirst()) { msg.setId(null); DBManager.get(context).addSmsMsg(msg); }
                     }
-                    dbManager.removeSmsMsgList(outdatedMsgList);
-                    XLog.d("Remove outdated code records succeed");
                 }
-            }
+                db.setTransactionSuccessful();
+            } finally { db.endTransaction(); }
+            // A failed cleanup is harmless: subsequent imports are idempotent.
+            for (File file : files) if (!file.delete()) XLog.w("Legacy record cleanup deferred");
             return true;
-        } catch (Throwable t) {
-            XLog.e("Import code records to database failed.", t);
-        }
-        return false;
+        } catch (Exception e) { XLog.e("Import legacy records failed", e); return false; }
     }
 
     /**

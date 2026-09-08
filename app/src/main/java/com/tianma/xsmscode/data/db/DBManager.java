@@ -48,9 +48,11 @@ public class DBManager {
         return sInstance;
     }
 
-    SQLiteDatabase getSQLiteDatabase() {
+    public SQLiteDatabase getSQLiteDatabase() {
         return mSQLiteDatabase;
     }
+
+    public void clearIdentityCache() { mDaoSession.clear(); }
 
     @SuppressWarnings("unchecked")
     private <T> AbstractDao<T, ?> getAbstractDao(Class<T> entityClass) {
