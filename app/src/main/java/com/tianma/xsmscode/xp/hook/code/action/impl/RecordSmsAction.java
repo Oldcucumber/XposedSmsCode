@@ -38,54 +38,26 @@ public class RecordSmsAction extends CallableAction {
         return null;
     }
 
-    private void recordSmsMsg(SmsMsg smsMsg) {
+    private static final java.util.concurrent.ScheduledExecutorService RETRIES = java.util.concurrent.Executors.newSingleThreadScheduledExecutor();
+    private static final java.util.concurrent.Semaphore SLOTS = new java.util.concurrent.Semaphore(32);
+    private void recordSmsMsg(SmsMsg msg) {
+        if (!SLOTS.tryAcquire()) { XLog.e("Record queue full"); return; }
+        write(msg, 0);
+    }
+    private void write(SmsMsg msg, int attempt) {
         try {
-            Uri smsMsgUri = DBProvider.SMS_MSG_CONTENT_URI;
-
             ContentValues values = new ContentValues();
-            values.put(SmsMsgDao.Properties.Body.columnName, smsMsg.getBody());
-            values.put(SmsMsgDao.Properties.Company.columnName, smsMsg.getCompany());
-            values.put(SmsMsgDao.Properties.Date.columnName, smsMsg.getDate());
-            values.put(SmsMsgDao.Properties.Sender.columnName, smsMsg.getSender());
-            values.put(SmsMsgDao.Properties.SmsCode.columnName, smsMsg.getSmsCode());
-
-            ContentResolver resolver = mPluginContext.getContentResolver();
-            resolver.insert(smsMsgUri, values);
-            XLog.d("Add code record succeed by content provider");
-
-            String[] projections = {SmsMsgDao.Properties.Id.columnName};
-            String order = SmsMsgDao.Properties.Date.columnName + " ASC";
-            Cursor cursor = resolver.query(smsMsgUri, projections, null, null, order);
-            if (cursor == null) {
-                return;
-            }
-            int count = cursor.getCount();
-            int maxRecordCount = PrefConst.MAX_SMS_RECORDS_COUNT_DEFAULT;
-            if (cursor.getCount() > maxRecordCount) {
-                // 删除最早的记录，直至剩余数目为 PrefConst.MAX_SMS_RECORDS_COUNT_DEFAULT
-                ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-                String selection = SmsMsgDao.Properties.Id.columnName + " = ?";
-                for (int i = 0; i < count - maxRecordCount; i++) {
-                    cursor.moveToNext();
-                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(SmsMsgDao.Properties.Id.columnName));
-                    ContentProviderOperation operation = ContentProviderOperation.newDelete(smsMsgUri)
-                            .withSelection(selection, new String[]{String.valueOf(id)})
-                            .build();
-
-                    operations.add(operation);
-                }
-
-                resolver.applyBatch(DBProvider.AUTHORITY, operations);
-                XLog.d("Remove outdated code records succeed by content provider");
-            }
-
-            cursor.close();
-        } catch (Exception e1) {
-            // ContentProvider dead.
-            // Write file to do data transition
-            if (CodeRecordRestoreManager.exportToFile(smsMsg)) {
-                XLog.d("Export code record to file succeed");
-            }
+            values.put(SmsMsgDao.Properties.Body.columnName, msg.getBody());
+            values.put(SmsMsgDao.Properties.Company.columnName, msg.getCompany());
+            values.put(SmsMsgDao.Properties.Date.columnName, msg.getDate());
+            values.put(SmsMsgDao.Properties.Sender.columnName, msg.getSender());
+            values.put(SmsMsgDao.Properties.SmsCode.columnName, msg.getSmsCode());
+            if (mPhoneContext.getContentResolver().insert(DBProvider.SMS_MSG_CONTENT_URI, values) == null)
+                throw new IllegalStateException("No record URI");
+            SLOTS.release();
+        } catch (Exception e) {
+            if (attempt < 2) RETRIES.schedule(() -> write(msg, attempt + 1), attempt + 1, java.util.concurrent.TimeUnit.SECONDS);
+            else { SLOTS.release(); XLog.e("Record unavailable after retry", e); }
         }
     }
 }

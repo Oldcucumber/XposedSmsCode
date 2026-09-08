@@ -28,6 +28,6 @@ public class CopyToClipboardAction extends RunnableAction {
     }
 
     private void copyToClipboard() {
-        ClipboardUtils.copyToClipboard(mPluginContext, mSmsMsg.getSmsCode());
+        ClipboardUtils.copyToClipboard(mPhoneContext, mSmsMsg.getSmsCode());
     }
 }

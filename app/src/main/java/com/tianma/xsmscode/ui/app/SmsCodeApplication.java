@@ -27,6 +27,7 @@ public class SmsCodeApplication extends DaggerApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        com.tianma.xsmscode.common.utils.StorageUtils.init(this);
         Cyanea.init(this, super.getResources());
         if (!Cyanea.getInstance().isThemeModified()) {
             Cyanea.getInstance().edit()

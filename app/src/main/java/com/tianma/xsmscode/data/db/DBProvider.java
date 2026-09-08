@@ -76,27 +76,44 @@ public class DBProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        int uriType = sUriMatcher.match(uri);
+        enforceCaller(true);
+        if (!SMS_MSG_CONTENT_URI.equals(uri) || values == null) throw new IllegalArgumentException("Unsupported insert");
+        java.util.Set<String> allowed = new java.util.HashSet<>(java.util.Arrays.asList("SENDER", "BODY", "DATE", "COMPANY", "SMS_CODE"));
+        if (!allowed.containsAll(values.keySet()) || values.getAsString("SENDER") == null
+                || values.getAsString("BODY") == null || values.getAsString("SMS_CODE") == null
+                || values.getAsLong("DATE") == null) throw new IllegalArgumentException("Invalid SMS record");
         long id;
-        String path;
-        switch (uriType) {
-            case SMS_MSG_DIR:
-                id = mDatabase.insert(TABLE_SMS_MSG, null, values);
-                path = PATH_SMS_MSG + "/" + id;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported URI: " + uri);
-        }
-        if (mContext != null) {
-            mContext.getContentResolver().notifyChange(uri, null);
-        }
-        if (id < 0) throw new android.database.SQLException("Insert failed");
+        mDatabase.beginTransaction();
+        try {
+            try (Cursor existing = mDatabase.query(TABLE_SMS_MSG, new String[]{"_id"},
+                    "SENDER=? AND BODY=? AND DATE=?", new String[]{values.getAsString("SENDER"), values.getAsString("BODY"), values.getAsString("DATE")}, null, null, null)) {
+                if (existing.moveToFirst()) id = existing.getLong(0);
+                else id = mDatabase.insertOrThrow(TABLE_SMS_MSG, null, values);
+            }
+            mDatabase.execSQL("DELETE FROM SMS_MSG WHERE _id NOT IN (SELECT _id FROM SMS_MSG ORDER BY DATE DESC, _id DESC LIMIT "
+                    + com.tianma.xsmscode.common.constant.PrefConst.MAX_SMS_RECORDS_COUNT_DEFAULT + ")");
+            mDatabase.setTransactionSuccessful();
+        } finally { mDatabase.endTransaction(); }
+        mContext.getContentResolver().notifyChange(uri, null);
         return android.content.ContentUris.withAppendedId(uri, id);
+    }
+
+    private void enforceCaller(boolean phoneMayWrite) {
+        int uid = android.os.Binder.getCallingUid();
+        if (uid == android.os.Process.myUid()) return;
+        if (phoneMayWrite && uid / 100000 == android.os.Process.myUid() / 100000) {
+            try {
+                android.content.pm.ApplicationInfo phone = mContext.getPackageManager().getApplicationInfo("com.android.phone", 0);
+                if (uid == phone.uid && (phone.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) return;
+            } catch (android.content.pm.PackageManager.NameNotFoundException ignored) { }
+        }
+        throw new SecurityException("Untrusted database caller");
     }
 
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+        enforceCaller(false);
         int uriType = sUriMatcher.match(uri);
         String tableName;
         switch (uriType) {
@@ -117,6 +134,7 @@ public class DBProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        enforceCaller(false);
         int uriType = sUriMatcher.match(uri);
         int rowsDeleted;
         switch (uriType) {
@@ -134,6 +152,7 @@ public class DBProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
+        enforceCaller(false);
         return 0;
     }
 }

@@ -57,7 +57,7 @@ public class EntityStoreManager {
             JsonUtils.toJson(entities, osw, true);
 
             // set file world writable
-            StorageUtils.setFileWorldWritable(storeFile, 0);
+
             return true;
         } catch (Exception e) {
             XLog.e("store entities to file failed", e);

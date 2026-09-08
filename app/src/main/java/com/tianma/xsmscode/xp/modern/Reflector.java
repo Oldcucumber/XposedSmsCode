@@ -7,7 +7,11 @@ import java.util.*;
 public final class Reflector {
     public static Class<?> findClass(String name, ClassLoader loader) {
         try { return Class.forName(name, false, loader); }
-        catch (ClassNotFoundException e) { throw new IllegalArgumentException(name, e); }
+        catch (ClassNotFoundException e) {
+            int dot = name.lastIndexOf('.');
+            if (dot > 0) return findClass(name.substring(0, dot) + "$" + name.substring(dot + 1), loader);
+            throw new IllegalArgumentException(name, e);
+        }
     }
     public static Class<?> findClassIfExists(String name, ClassLoader loader) {
         try { return findClass(name, loader); } catch (IllegalArgumentException e) { return null; }

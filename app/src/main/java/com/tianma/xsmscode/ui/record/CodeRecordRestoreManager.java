@@ -28,34 +28,6 @@ public class CodeRecordRestoreManager {
     /**
      * Export code record to file
      */
-    @SuppressLint({"SetWorldWritable", "SetWorldReadable"})
-    public static boolean exportToFile(SmsMsg smsMsg) {
-        OutputStreamWriter osw = null;
-        try {
-            String filename = RECORD_FILE_PREFIX + smsMsg.getDate();
-            File recordFile = new File(StorageUtils.getFilesDir(), filename);
-            osw = new OutputStreamWriter(
-                    new FileOutputStream(recordFile), StandardCharsets.UTF_8);
-
-            JsonUtils.toJson(smsMsg, osw, true);
-
-            // set file world writable
-            StorageUtils.setFileWorldWritable(recordFile, 0);
-            return true;
-        } catch (Exception e) {
-            XLog.e("Export code record to file failed", e);
-            return false;
-        } finally {
-            if (osw != null) {
-                try {
-                    osw.close();
-                } catch (IOException ioException) {
-                    // ignore
-                }
-            }
-        }
-    }
-
     /**
      * Import code records to database
      */

@@ -99,53 +99,11 @@ public class StorageUtils {
      * @see StorageUtils#getInternalFilesDir()
      */
     public static File getFilesDir() {
-        if (isSDCardMounted()) {
-            File externalFilesDir = getExternalFilesDir();
-            if (!externalFilesDir.exists()) {
-                externalFilesDir.mkdirs();
-            }
-            return externalFilesDir;
-        } else {
-            return getInternalFilesDir();
-        }
+        if (privateFiles == null) throw new IllegalStateException("App storage not initialized");
+        return privateFiles;
     }
 
-    /**
-     * Set file world writable
-     */
-    @SuppressLint({"SetWorldWritable", "SetWorldReadable"})
-    public static void setFileWorldWritable(File file, int parentDepth) {
-        if (!file.exists()) {
-            return;
-        }
-        parentDepth = parentDepth + 1;
-        for (int i = 0; i < parentDepth; i++) {
-            file.setExecutable(true, false);
-            file.setWritable(true, false);
-            file.setReadable(true, false);
-            file = file.getParentFile();
-            if (file == null) {
-                break;
-            }
-        }
-    }
+    private static File privateFiles;
+    public static void init(Context context) { privateFiles = context.getFilesDir(); }
 
-    /**
-     * Set file world readable
-     */
-    @SuppressLint("SetWorldReadable")
-    public static void setFileWorldReadable(File file, int parentDepth) {
-        if (!file.exists()) {
-            return;
-        }
-
-        for (int i = 0; i < parentDepth; i++) {
-            file.setReadable(true, false);
-            file.setExecutable(true, false);
-            file = file.getParentFile();
-            if (file == null) {
-                break;
-            }
-        }
-    }
 }
