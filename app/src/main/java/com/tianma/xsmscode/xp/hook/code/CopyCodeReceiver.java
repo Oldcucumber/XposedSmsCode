@@ -27,7 +27,7 @@ public class CopyCodeReceiver extends BroadcastReceiver {
     }
 
     public static Intent createIntent(String smsCode) {
-        Intent intent = new Intent(ACTION_COPY_CODE);
+        Intent intent = new Intent(ACTION_COPY_CODE).setPackage(SmsHandlerHook.ANDROID_PHONE_PACKAGE);
         intent.putExtra(EXTRA_KEY_CODE, smsCode);
         return intent;
     }
@@ -36,7 +36,11 @@ public class CopyCodeReceiver extends BroadcastReceiver {
         CopyCodeReceiver receiver = CopyCodeReceiver.newInstance();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_COPY_CODE);
-        context.registerReceiver(receiver, filter);
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            context.registerReceiver(receiver, filter, "android.permission.MODIFY_PHONE_STATE", null);
+        }
     }
 
     private Context mPluginContext;
@@ -46,6 +50,7 @@ public class CopyCodeReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (ACTION_COPY_CODE.equals(action)) {
             String smsCode = intent.getStringExtra(EXTRA_KEY_CODE);
+            if (smsCode == null || smsCode.isEmpty()) return;
             // copy to clipboard
             ClipboardUtils.copyToClipboard(phoneContext, smsCode);
 

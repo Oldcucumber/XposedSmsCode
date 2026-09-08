@@ -59,31 +59,10 @@ public class NotifyAction extends CallableAction {
         int notificationId = smsMsg.hashCode();
 
         Intent copyCodeIntent = CopyCodeReceiver.createIntent(smsCode);
-        final PendingIntent contentIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Targeting U+ (version 34 and above) disallows creating or retrieving a PendingIntent with FLAG_MUTABLE,
-            // an implicit Intent within and without FLAG_NO_CREATE and FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT
-            // for security reasons. To retrieve an already existing PendingIntent, use FLAG_NO_CREATE,
-            // however, to create a new PendingIntent with an implicit Intent use FLAG_IMMUTABLE.
-
-            // https://stackoverflow.com/questions/77275691
-            contentIntent = PendingIntent.getBroadcast(mPhoneContext, 0,
-                    copyCodeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // java.lang.IllegalArgumentException: com.android.phone: Targeting S+ (version 31 and above)
-            // requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE be specified when creating a PendingIntent.
-            //
-            // Strongly consider using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality depends on the
-            // PendingIntent being mutable, e.g. if it needs to be used with inline replies or bubbles.
-            // contentIntent = PendingIntent.getBroadcast(mPhoneContext, 0, copyCodeIntent, PendingIntent.FLAG_MUTABLE);
-
-            // https://stackoverflow.com/a/69745644
-            contentIntent = PendingIntent.getBroadcast(mPhoneContext, 0,
-                    copyCodeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-        } else {
-            contentIntent = PendingIntent.getBroadcast(mPhoneContext,
-                    0, copyCodeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        copyCodeIntent.setData(android.net.Uri.parse("smscode://copy/" + notificationId));
+        final PendingIntent contentIntent = PendingIntent.getBroadcast(mPhoneContext,
+                notificationId, copyCodeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(mPluginContext, NotificationConst.CHANNEL_ID_SMSCODE_NOTIFICATION)
                 .setSmallIcon(R.drawable.ic_app_icon)

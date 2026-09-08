@@ -275,11 +275,8 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void registerCopyCodeReceiver() {
-        XSharedPreferences xsp = new XSharedPreferences(BuildConfig.APPLICATION_ID, PrefConst.PREF_NAME);
-        if (XSPUtils.showCodeNotification(xsp)) {
-            CopyCodeReceiver.registerMe(mPhoneContext);
-            XLog.d("Register copy code receiver");
-        }
+        CopyCodeReceiver.registerMe(mPhoneContext);
+        XLog.d("Register copy code receiver");
     }
 
     private class DispatchIntentHook extends XC_MethodHook {
