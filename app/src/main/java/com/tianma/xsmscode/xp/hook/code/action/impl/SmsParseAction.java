@@ -42,6 +42,7 @@ public class SmsParseAction extends CallableAction {
 
     private Bundle parseSmsMsg() {
         mSmsMsg = SmsMsg.fromIntent(mSmsIntent);
+        if (mSmsMsg == null) return null;
 
         String sender = mSmsMsg.getSender();
         String msgBody = mSmsMsg.getBody();

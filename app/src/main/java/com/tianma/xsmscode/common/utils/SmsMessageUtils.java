@@ -16,6 +16,10 @@ public class SmsMessageUtils {
     }
 
     public static String getMessageBody(SmsMessage[] messageParts) {
+        if (messageParts == null || messageParts.length == 0) return null;
+        for (SmsMessage part : messageParts) {
+            if (part == null || part.getDisplayMessageBody() == null) return null;
+        }
         if (messageParts.length == 1) {
             return messageParts[0].getDisplayMessageBody();
         } else {

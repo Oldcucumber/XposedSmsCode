@@ -49,9 +49,13 @@ public class SmsMsg implements Parcelable {
     private String smsCode;
 
     public static SmsMsg fromIntent(Intent intent) {
+        if (intent == null) return null;
         SmsMessage[] smsMessageParts = SmsMessageUtils.fromIntent(intent);
+        if (smsMessageParts == null || smsMessageParts.length == 0 || smsMessageParts[0] == null) return null;
         String sender = smsMessageParts[0].getDisplayOriginatingAddress();
         String body = SmsMessageUtils.getMessageBody(smsMessageParts);
+
+        if (sender == null || body == null) return null;
 
         sender = Normalizer.normalize(sender, Normalizer.Form.NFC);
         body = Normalizer.normalize(body, Normalizer.Form.NFC);
@@ -177,12 +181,12 @@ public class SmsMsg implements Parcelable {
         if (!(o instanceof SmsMsg))
             return false;
         SmsMsg smsMsg = (SmsMsg) o;
-        return id.equals(smsMsg.id);
+        return id != null && id.equals(smsMsg.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sender, body, date, company, smsCode);
+        return id == null ? System.identityHashCode(this) : id.hashCode();
     }
 
     @Override
