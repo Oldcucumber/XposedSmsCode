@@ -23,11 +23,11 @@ import com.tianma.xsmscode.xp.hook.BaseHook;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XSharedPreferences;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import com.tianma.xsmscode.xp.modern.HookCallback;
+import android.content.SharedPreferences;
+import com.tianma.xsmscode.xp.modern.HookRuntime;
+import com.tianma.xsmscode.xp.modern.Reflector;
+import com.tianma.xsmscode.xp.modern.LoadedPackage;
 
 /**
  * Hook class com.android.internal.telephony.InBoundSmsHandler
@@ -46,7 +46,7 @@ public class SmsHandlerHook extends BaseHook {
     private Context mPluginContext;
 
     @Override
-    public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
+    public void onLoadPackage(LoadedPackage lpparam) {
         if (ANDROID_PHONE_PACKAGE.equals(lpparam.packageName)) {
             XLog.i("SmsCode initializing");
             printDeviceInfo();
@@ -66,9 +66,9 @@ public class SmsHandlerHook extends BaseHook {
         XLog.i("Android version: %s", Build.VERSION.RELEASE);
         int xposedVersion;
         try {
-            xposedVersion = XposedBridge.getXposedVersion();
+            xposedVersion = HookRuntime.getXposedVersion();
         } catch (Throwable e) {
-            xposedVersion = XposedBridge.XPOSED_BRIDGE_VERSION;
+            xposedVersion = HookRuntime.XPOSED_BRIDGE_VERSION;
         }
         XLog.i("Xposed bridge version: %d", xposedVersion);
         XLog.i("SmsCode version: %s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
@@ -98,7 +98,7 @@ public class SmsHandlerHook extends BaseHook {
     // Android 14+
     private void hookConstructor34(ClassLoader classLoader) {
         XLog.i("Hooking InboundSmsHandler constructor for android v34+");
-//        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classLoader,
+//        Reflector.findAndHookConstructor(SMS_HANDLER_CLASS, classLoader,
 //                /* name                 */ String.class,
 //                /* context              */ Context.class,
 //                /* storageMonitor       */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
@@ -108,14 +108,14 @@ public class SmsHandlerHook extends BaseHook {
 //                new ConstructorHook());
         Class<?> smsHandlerClazz = XposedWrapper.findClass(SMS_HANDLER_CLASS, classLoader);
         if (smsHandlerClazz != null) {
-            XposedBridge.hookAllConstructors(smsHandlerClazz, new ConstructorHook());
+            HookRuntime.hookAllConstructors(smsHandlerClazz, new ConstructorHook());
         }
     }
 
     // Android 11+
     private void hookConstructor30(ClassLoader classloader) {
         XLog.i("Hooking InboundSmsHandler constructor for android v30+");
-        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
+        Reflector.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
                 /* name                 */ String.class,
                 /* context              */ Context.class,
                 /* storageMonitor       */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
@@ -126,7 +126,7 @@ public class SmsHandlerHook extends BaseHook {
     // Android N+
     private void hookConstructor24(ClassLoader classloader) {
         XLog.i("Hooking InboundSmsHandler constructor for android v24+");
-        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
+        Reflector.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
                 /* name                 */ String.class,
                 /* context              */ Context.class,
                 /* storageMonitor       */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
@@ -138,7 +138,7 @@ public class SmsHandlerHook extends BaseHook {
     // Android KitKat+
     private void hookConstructor19(ClassLoader classloader) {
         XLog.i("Hooking InboundSmsHandler constructor for Android v19+");
-        XposedHelpers.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
+        Reflector.findAndHookConstructor(SMS_HANDLER_CLASS, classloader,
                 /*                 name */ String.class,
                 /*              context */ Context.class,
                 /*       storageMonitor */ TELEPHONY_PACKAGE + ".SmsStorageMonitor",
@@ -162,7 +162,7 @@ public class SmsHandlerHook extends BaseHook {
     // Android K
     private void hookDispatchIntent19(ClassLoader classloader) {
         XLog.d("Hooking dispatchIntent() for Android v19+");
-        XposedHelpers.findAndHookMethod(SMS_HANDLER_CLASS, classloader, "dispatchIntent",
+        Reflector.findAndHookMethod(SMS_HANDLER_CLASS, classloader, "dispatchIntent",
                 /*         intent */ Intent.class,
                 /*     permission */ String.class,
                 /*          appOp */ int.class,
@@ -173,7 +173,7 @@ public class SmsHandlerHook extends BaseHook {
     // Android L+
     private void hookDispatchIntent21(ClassLoader classloader) {
         XLog.d("Hooking dispatchIntent() for Android v21+");
-        XposedHelpers.findAndHookMethod(SMS_HANDLER_CLASS, classloader, "dispatchIntent",
+        Reflector.findAndHookMethod(SMS_HANDLER_CLASS, classloader, "dispatchIntent",
                 /*         intent */ Intent.class,
                 /*     permission */ String.class,
                 /*          appOp */ int.class,
@@ -185,7 +185,7 @@ public class SmsHandlerHook extends BaseHook {
     // Android M+
     private void hookDispatchIntent23(ClassLoader classloader) {
         XLog.d("Hooking dispatchIntent() for Android v23+");
-        XposedHelpers.findAndHookMethod(SMS_HANDLER_CLASS, classloader, "dispatchIntent",
+        Reflector.findAndHookMethod(SMS_HANDLER_CLASS, classloader, "dispatchIntent",
                 /*         intent */ Intent.class,
                 /*     permission */ String.class,
                 /*          appOp */ int.class,
@@ -237,7 +237,7 @@ public class SmsHandlerHook extends BaseHook {
         XposedWrapper.hookMethod(exactMethod, new DispatchIntentHook(receiverIndex));
     }
 
-    private class ConstructorHook extends XC_MethodHook {
+    private class ConstructorHook extends HookCallback {
         @Override
         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
             try {
@@ -249,7 +249,7 @@ public class SmsHandlerHook extends BaseHook {
         }
     }
 
-    private void afterConstructorHandler(XC_MethodHook.MethodHookParam param) {
+    private void afterConstructorHandler(HookCallback.MethodHookParam param) {
         Context context = (Context) param.args[1];
         if (mPhoneContext == null) {
             mPhoneContext = context;
@@ -279,7 +279,7 @@ public class SmsHandlerHook extends BaseHook {
         XLog.d("Register copy code receiver");
     }
 
-    private class DispatchIntentHook extends XC_MethodHook {
+    private class DispatchIntentHook extends HookCallback {
         private final int mReceiverIndex;
 
         DispatchIntentHook(int receiverIndex) {
@@ -297,7 +297,7 @@ public class SmsHandlerHook extends BaseHook {
         }
     }
 
-    private void beforeDispatchIntentHandler(XC_MethodHook.MethodHookParam param, int receiverIndex) {
+    private void beforeDispatchIntentHandler(HookCallback.MethodHookParam param, int receiverIndex) {
         Intent intent = (Intent) param.args[0];
         String action = intent.getAction();
 
@@ -334,7 +334,7 @@ public class SmsHandlerHook extends BaseHook {
 
     private void sendEventBroadcastComplete(Object inboundSmsHandler) {
         XLog.d("Send event(EVENT_BROADCAST_COMPLETE)");
-        XposedHelpers.callMethod(inboundSmsHandler, "sendMessage", EVENT_BROADCAST_COMPLETE);
+        Reflector.callMethod(inboundSmsHandler, "sendMessage", EVENT_BROADCAST_COMPLETE);
     }
 
     private void deleteFromRawTable(Object inboundSmsHandler, Object smsReceiver) throws ReflectiveOperationException {
@@ -347,8 +347,8 @@ public class SmsHandlerHook extends BaseHook {
 
     private void deleteFromRawTable19(Object inboundSmsHandler, Object smsReceiver) throws ReflectiveOperationException {
         XLog.d("Delete raw SMS data from database on Android 19+");
-        Object deleteWhere = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhere");
-        Object deleteWhereArgs = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhereArgs");
+        Object deleteWhere = Reflector.getObjectField(smsReceiver, "mDeleteWhere");
+        Object deleteWhereArgs = Reflector.getObjectField(smsReceiver, "mDeleteWhereArgs");
 
         callDeclaredMethod(SMS_HANDLER_CLASS, inboundSmsHandler, "deleteFromRawTable",
                 /* String deleteWhere       */ deleteWhere,
@@ -357,8 +357,8 @@ public class SmsHandlerHook extends BaseHook {
 
     private void deleteFromRawTable24(Object inboundSmsHandler, Object smsReceiver) throws ReflectiveOperationException {
         XLog.d("Delete raw SMS data from database on Android 24+");
-        Object deleteWhere = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhere");
-        Object deleteWhereArgs = XposedHelpers.getObjectField(smsReceiver, "mDeleteWhereArgs");
+        Object deleteWhere = Reflector.getObjectField(smsReceiver, "mDeleteWhere");
+        Object deleteWhereArgs = Reflector.getObjectField(smsReceiver, "mDeleteWhereArgs");
         final int MARK_DELETED = 2;
 
         callDeclaredMethod(SMS_HANDLER_CLASS, inboundSmsHandler, "deleteFromRawTable",
@@ -368,10 +368,10 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private static Object callDeclaredMethod(String className, Object obj, String methodName, Object... args) throws InvocationTargetException, IllegalAccessException {
-        // XposedHelpers#callMethod() 方法，不能反射调用 private 的方法
+        // Reflector#callMethod() 方法，不能反射调用 private 的方法
         // 而本方法可以反射调用指定类的 private 方法
-        Class<?> clz = XposedHelpers.findClass(className, obj.getClass().getClassLoader());
-        Method method = XposedHelpers.findMethodBestMatch(clz, methodName, args);
+        Class<?> clz = Reflector.findClass(className, obj.getClass().getClassLoader());
+        Method method = Reflector.findMethodBestMatch(clz, methodName, args);
         return method.invoke(obj, args);
     }
 

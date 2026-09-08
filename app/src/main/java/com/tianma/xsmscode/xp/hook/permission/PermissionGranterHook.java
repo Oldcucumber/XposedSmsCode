@@ -4,7 +4,7 @@ import android.os.Build;
 
 import com.tianma.xsmscode.xp.hook.BaseHook;
 
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import com.tianma.xsmscode.xp.modern.LoadedPackage;
 
 /**
  * Hook com.android.server.pm.PackageManagerService to grant permissions.
@@ -14,7 +14,7 @@ public class PermissionGranterHook extends BaseHook {
     public static final String ANDROID_PACKAGE = "android";
 
     @Override
-    public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
+    public void onLoadPackage(LoadedPackage lpparam) {
         if (ANDROID_PACKAGE.equals(lpparam.packageName) && ANDROID_PACKAGE.equals(lpparam.processName)) {
             ClassLoader classLoader = lpparam.classLoader;
 

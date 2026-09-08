@@ -11,11 +11,11 @@ import com.tianma.xsmscode.common.utils.XSPUtils;
 import com.tianma.xsmscode.data.db.entity.SmsMsg;
 import com.tianma.xsmscode.xp.hook.code.action.CallableAction;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 public class KillMeAction extends CallableAction {
 
-    public KillMeAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public KillMeAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 

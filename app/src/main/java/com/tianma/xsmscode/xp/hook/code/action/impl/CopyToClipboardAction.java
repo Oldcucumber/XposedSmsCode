@@ -8,14 +8,14 @@ import com.tianma.xsmscode.common.utils.XSPUtils;
 import com.tianma.xsmscode.data.db.entity.SmsMsg;
 import com.tianma.xsmscode.xp.hook.code.action.RunnableAction;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 将验证码复制到剪切板
  */
 public class CopyToClipboardAction extends RunnableAction {
 
-    public CopyToClipboardAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public CopyToClipboardAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 

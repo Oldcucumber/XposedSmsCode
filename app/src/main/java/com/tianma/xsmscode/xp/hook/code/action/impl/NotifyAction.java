@@ -22,7 +22,7 @@ import com.tianma.xsmscode.data.db.entity.SmsMsg;
 import com.tianma.xsmscode.xp.hook.code.CopyCodeReceiver;
 import com.tianma.xsmscode.xp.hook.code.action.CallableAction;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 显示验证码通知
@@ -32,7 +32,7 @@ public class NotifyAction extends CallableAction {
     public static final String NOTIFY_RETENTION_TIME = "notify_retention_time";
     public static final String NOTIFY_ID = "notify_id";
 
-    public NotifyAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public NotifyAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 

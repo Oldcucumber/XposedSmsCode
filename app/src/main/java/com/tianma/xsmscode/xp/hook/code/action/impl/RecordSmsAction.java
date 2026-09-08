@@ -19,14 +19,14 @@ import com.tianma.xsmscode.xp.hook.code.action.CallableAction;
 
 import java.util.ArrayList;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 记录验证码短信
  */
 public class RecordSmsAction extends CallableAction {
 
-    public RecordSmsAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public RecordSmsAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 

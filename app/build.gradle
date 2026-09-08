@@ -101,8 +101,9 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
 
     // Xposed
-    compileOnly 'de.robv.android.xposed:api:82'
-    // compileOnly 'de.robv.android.xposed:api:82:sources'
+    compileOnly 'io.github.libxposed:api:102.0.0'
+    implementation 'io.github.libxposed:service:102.0.0'
+
 
     // Material Dialogs
     implementation "com.afollestad.material-dialogs:core:$materialDialogVersion"

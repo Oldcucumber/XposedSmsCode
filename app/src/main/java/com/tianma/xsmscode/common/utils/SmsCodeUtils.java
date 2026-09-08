@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 验证码相关Utils
@@ -58,7 +58,7 @@ public class SmsCodeUtils {
     }
 
     private static String loadCodeKeywordsByXSP() {
-        XSharedPreferences preferences = new XSharedPreferences(BuildConfig.APPLICATION_ID, PrefConst.PREF_NAME);
+        SharedPreferences preferences = com.tianma.xsmscode.xp.modern.HookConfiguration.current();
         return XSPUtils.getSMSCodeKeywords(preferences);
     }
 

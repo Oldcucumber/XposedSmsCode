@@ -8,7 +8,7 @@ import com.tianma.xsmscode.common.utils.XLog;
 import com.tianma.xsmscode.data.db.entity.SmsMsg;
 import com.tianma.xsmscode.xp.hook.code.action.CallableAction;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 public class CancelNotifyAction extends CallableAction {
 
@@ -16,7 +16,7 @@ public class CancelNotifyAction extends CallableAction {
 
     private int mNotificationId = NOTIFICATION_NONE;
 
-    public CancelNotifyAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public CancelNotifyAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 

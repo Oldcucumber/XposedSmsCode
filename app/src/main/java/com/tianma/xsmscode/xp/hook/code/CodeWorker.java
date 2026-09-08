@@ -27,13 +27,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 public class CodeWorker {
 
     private final Context mPhoneContext;
     private final Context mPluginContext;
-    private final XSharedPreferences xsp;
+    private final SharedPreferences xsp;
     private final Intent mSmsIntent;
 
     private final Handler mUIHandler;
@@ -60,7 +60,7 @@ public class CodeWorker {
     CodeWorker(Context pluginContext, Context phoneContext, Intent smsIntent) {
         mPluginContext = pluginContext;
         mPhoneContext = phoneContext;
-        xsp = new XSharedPreferences(BuildConfig.APPLICATION_ID, PrefConst.PREF_NAME);
+        xsp = com.tianma.xsmscode.xp.modern.HookConfiguration.current();
         mSmsIntent = smsIntent;
 
         mUIHandler = new Handler(Looper.getMainLooper());
@@ -69,7 +69,7 @@ public class CodeWorker {
     }
 
     public ParseResult parse() {
-        if (!XSPUtils.isEnabled(xsp)) {
+        if (xsp == null || !XSPUtils.isEnabled(xsp)) {
             XLog.i("XposedSmsCode disabled, exiting");
             return null;
         }

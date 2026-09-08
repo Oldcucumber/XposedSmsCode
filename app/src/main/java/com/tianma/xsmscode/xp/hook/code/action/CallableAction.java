@@ -8,7 +8,7 @@ import com.tianma.xsmscode.data.db.entity.SmsMsg;
 
 import java.util.concurrent.Callable;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * Action + Callable
@@ -18,9 +18,9 @@ public abstract class CallableAction implements Action<Bundle>, Callable<Bundle>
     protected Context mPluginContext;
     protected Context mPhoneContext;
     protected SmsMsg mSmsMsg;
-    protected XSharedPreferences xsp;
+    protected SharedPreferences xsp;
 
-    public CallableAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public CallableAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         mPluginContext = pluginContext;
         mPhoneContext = phoneContext;
         mSmsMsg = smsMsg;

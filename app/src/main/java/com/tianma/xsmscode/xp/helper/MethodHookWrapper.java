@@ -3,9 +3,9 @@ package com.tianma.xsmscode.xp.helper;
 
 import com.tianma.xsmscode.common.utils.XLog;
 
-import de.robv.android.xposed.XC_MethodHook;
+import com.tianma.xsmscode.xp.modern.HookCallback;
 
-public abstract class MethodHookWrapper extends XC_MethodHook {
+public abstract class MethodHookWrapper extends HookCallback {
 
     @Override
     final protected void beforeHookedMethod(MethodHookParam param) throws Throwable {

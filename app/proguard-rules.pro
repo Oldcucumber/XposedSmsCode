@@ -1,16 +1,6 @@
--keepclasseswithmembers class * implements de.robv.android.xposed.IXposedHookLoadPackage {
-    public void handleLoadPackage(...);
-}
-
--keepclasseswithmembers class * implements de.robv.android.xposed.IXposedHookZygoteInit {
-    public void initZygote(...);
-}
-
--keep class com.tianma.xsmscode.common.utils.ModuleUtils {
-    int getModuleVersion();
-}
-
-
+-keep public class com.tianma.xsmscode.xp.HookEntry { public <init>(); }
+-dontwarn io.github.libxposed.annotation.**
+-keepattributes Signature,InnerClasses,EnclosingMethod
 # ==========================
 # Umeng analyze proguard start
 

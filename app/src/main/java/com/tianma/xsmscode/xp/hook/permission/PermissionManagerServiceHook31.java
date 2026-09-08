@@ -14,9 +14,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+import com.tianma.xsmscode.xp.modern.HookCallback;
+import com.tianma.xsmscode.xp.modern.HookRuntime;
+import com.tianma.xsmscode.xp.modern.Reflector;
 
 /**
  * Since Android 12 & 12L(API 31~32)<br/>
@@ -52,7 +52,7 @@ public class PermissionManagerServiceHook31 extends BaseSubHook {
         if (method == null) {
             XLog.e("Cannot find the method to grant relevant permission");
         }
-        XposedBridge.hookMethod(method, new MethodHookWrapper() {
+        HookRuntime.hookMethod(method, new MethodHookWrapper() {
             @Override
             protected void after(MethodHookParam param) throws Throwable {
                 afterGrantPermissionsSinceAndroid12(param);
@@ -61,12 +61,12 @@ public class PermissionManagerServiceHook31 extends BaseSubHook {
     }
 
     private Method findTargetMethod() {
-        Class<?> pmsClass = XposedHelpers.findClass(CLASS_PERMISSION_MANAGER_SERVICE, mClassLoader);
-        Class<?> androidPackageClass = XposedHelpers.findClass(CLASS_ANDROID_PACKAGE, mClassLoader);
-        Class<?> callbackClass = XposedHelpers.findClassIfExists(CLASS_PERMISSION_CALLBACK, mClassLoader);
+        Class<?> pmsClass = Reflector.findClass(CLASS_PERMISSION_MANAGER_SERVICE, mClassLoader);
+        Class<?> androidPackageClass = Reflector.findClass(CLASS_ANDROID_PACKAGE, mClassLoader);
+        Class<?> callbackClass = Reflector.findClassIfExists(CLASS_PERMISSION_CALLBACK, mClassLoader);
 
         // 精确匹配
-        Method method = XposedHelpers.findMethodExactIfExists(pmsClass, "restorePermissionState",
+        Method method = Reflector.findMethodExactIfExists(pmsClass, "restorePermissionState",
                 /* AndroidPackage pkg          */ androidPackageClass,
                 /* boolean replace             */ boolean.class,
                 /* String packageOfInterest    */ String.class,
@@ -75,7 +75,7 @@ public class PermissionManagerServiceHook31 extends BaseSubHook {
 
         if (method == null) { // method restorePermissionState() not found
             // 参数类型精确匹配
-            Method[] _methods = XposedHelpers.findMethodsByExactParameters(pmsClass, Void.TYPE,
+            Method[] _methods = Reflector.findMethodsByExactParameters(pmsClass, Void.TYPE,
                     /* AndroidPackage pkg          */ androidPackageClass,
                     /* boolean replace             */ boolean.class,
                     /* String packageOfInterest    */ String.class,
@@ -89,11 +89,11 @@ public class PermissionManagerServiceHook31 extends BaseSubHook {
     }
 
     @SuppressWarnings("unchecked")
-    private void afterGrantPermissionsSinceAndroid12(XC_MethodHook.MethodHookParam param) {
+    private void afterGrantPermissionsSinceAndroid12(HookCallback.MethodHookParam param) {
         // com.android.server.pm.parsing.pkg.AndroidPackage 对象
         Object pkg = param.args[0];
 
-        final String _packageName = (String) XposedHelpers.callMethod(pkg, "getPackageName");
+        final String _packageName = (String) Reflector.callMethod(pkg, "getPackageName");
 
         Set<String> packageSet = PACKAGE_PERMISSIONS.keySet();
         for (String packageName : packageSet) {
@@ -103,25 +103,25 @@ public class PermissionManagerServiceHook31 extends BaseSubHook {
                 // PermissionManagerService 对象
                 Object permissionManagerService = param.thisObject;
                 // PackageManagerInternal 对象 mPackageManagerInt
-                Object mPackageManagerInt = XposedHelpers.getObjectField(permissionManagerService, "mPackageManagerInt");
+                Object mPackageManagerInt = Reflector.getObjectField(permissionManagerService, "mPackageManagerInt");
 
                 // PackageSetting 对象 ps
                 // final PackageSetting ps = (PackageSetting) mPackageManagerInt.getPackageSetting(pkg.getPackageName());
-                final Object ps = XposedHelpers.callMethod(mPackageManagerInt, "getPackageSetting", packageName);
+                final Object ps = Reflector.callMethod(mPackageManagerInt, "getPackageSetting", packageName);
 
                 // Manifest.xml 中声明的permission列表
                 // List<String> requestPermissions = pkg.getRequestPermissions();
                 final List<String> requestedPermissions = (List<String>)
-                        XposedHelpers.callMethod(pkg, "getRequestedPermissions");
+                        Reflector.callMethod(pkg, "getRequestedPermissions");
 
                 // com.android.server.pm.permission.DevicePermissionState 对象
-                final Object mState = XposedHelpers.getObjectField(permissionManagerService, "mState");
+                final Object mState = Reflector.getObjectField(permissionManagerService, "mState");
 
                 // UserHandle.USER_ALL
                 int filterUserId = (int) param.args[4];
-                final int USER_ALL = XposedHelpers.getStaticIntField(UserHandle.class, "USER_ALL");
+                final int USER_ALL = Reflector.getStaticIntField(UserHandle.class, "USER_ALL");
                 final int[] userIds = filterUserId == USER_ALL
-                        ? (int[]) XposedHelpers.callMethod(permissionManagerService, "getAllUserIds")
+                        ? (int[]) Reflector.callMethod(permissionManagerService, "getAllUserIds")
                         : new int[]{filterUserId};
 
                 List<String> permissionsToGrant = PACKAGE_PERMISSIONS.get(packageName);
@@ -129,21 +129,21 @@ public class PermissionManagerServiceHook31 extends BaseSubHook {
                 if (userIds != null) {
                     for (final int userId : userIds) {
                         // com.android.server.pm.permission.UserPermissionState 对象
-                        Object userState = XposedHelpers.callMethod(mState, "getOrCreateUserState", userId);
-                        int appId = (int) XposedHelpers.callMethod(ps, "getAppId");
+                        Object userState = Reflector.callMethod(mState, "getOrCreateUserState", userId);
+                        int appId = (int) Reflector.callMethod(ps, "getAppId");
                         //  com.android.server.pm.permission.UidPermissionState 对象
-                        Object uidState = XposedHelpers.callMethod(userState, "getOrCreateUidState", appId);
+                        Object uidState = Reflector.callMethod(userState, "getOrCreateUidState", appId);
 
                         // com.android.server.pm.permission.PermissionRegistry 对象
-                        Object mRegistry = XposedHelpers.getObjectField(permissionManagerService, "mRegistry");
+                        Object mRegistry = Reflector.getObjectField(permissionManagerService, "mRegistry");
 
                         for (String permissionToGrant : permissionsToGrant) {
                             if (!requestedPermissions.contains(permissionToGrant)) {
-                                boolean granted = (boolean) XposedHelpers.callMethod(uidState, "isPermissionGranted", permissionToGrant);
+                                boolean granted = (boolean) Reflector.callMethod(uidState, "isPermissionGranted", permissionToGrant);
                                 if (!granted) {
                                     // permission not grant before
-                                    final Object bpToGrant = XposedHelpers.callMethod(mRegistry, "getPermission", permissionToGrant);
-                                    boolean result = (boolean) XposedHelpers.callMethod(uidState, "grantPermission", bpToGrant);
+                                    final Object bpToGrant = Reflector.callMethod(mRegistry, "getPermission", permissionToGrant);
+                                    boolean result = (boolean) Reflector.callMethod(uidState, "grantPermission", bpToGrant);
                                     XLog.d("Add " + permissionToGrant + "; result = " + result);
                                 } else {
                                     // permission has been granted already

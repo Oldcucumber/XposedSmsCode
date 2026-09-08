@@ -59,13 +59,16 @@ public class DBManager {
 
     public <T> long insertOrReplace(Class<T> entityClass, T entity) {
         AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
-        return abstractDao.insertOrReplace(entity);
+        long id = abstractDao.insertOrReplace(entity);
+        com.tianma.xsmscode.feature.config.ConfigStore.changed();
+        return id;
     }
 
     public <T> Observable<T> insertOrReplaceRx(Class<T> entityClass, T entity) {
         return Observable.fromCallable(() -> {
             AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
             abstractDao.insertOrReplace(entity);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
             return entity;
         });
     }
@@ -73,12 +76,14 @@ public class DBManager {
     public <T> void insertOrReplaceInTx(Class<T> entityClass, List<T> entities) {
         AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
         abstractDao.insertOrReplaceInTx(entities);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
     }
 
     public <T> Observable<List<T>> insertOrReplaceInTxRx(Class<T> entityClass, List<T> entities) {
         return Observable.fromCallable(() -> {
             AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
             abstractDao.insertOrReplaceInTx(entities);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
             return entities;
         });
     }
@@ -86,12 +91,14 @@ public class DBManager {
     private <T> void update(Class<T> entityClass, T entity) {
         AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
         abstractDao.update(entity);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
     }
 
     public <T> Observable<T> updateRx(Class<T> entityClass, T entity) {
         return Observable.fromCallable(() -> {
             AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
             abstractDao.update(entity);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
             return entity;
         });
     }
@@ -99,12 +106,14 @@ public class DBManager {
     private <T> void delete(Class<T> entityClass, T entity) {
         AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
         abstractDao.delete(entity);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
     }
 
     public <T> Observable<T> deleteRx(Class<T> entityClass, T entity) {
         return Observable.fromCallable(() -> {
             AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
             abstractDao.delete(entity);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
             return entity;
         });
     }
@@ -112,12 +121,14 @@ public class DBManager {
     private <T> void deleteInTx(Class<T> entityClass, List<T> entities) {
         AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
         abstractDao.deleteInTx(entities);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
     }
 
     public <T> Observable<List<T>> deleteInTxRx(Class<T> entityClass, List<T> entities) {
         return Observable.fromCallable(() -> {
             AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
             abstractDao.deleteInTx(entities);
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
             return entities;
         });
     }
@@ -125,12 +136,14 @@ public class DBManager {
     public <T> void deleteAll(Class<T> entityClass) {
         AbstractDao abstractDao = getAbstractDao(entityClass);
         abstractDao.deleteAll();
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
     }
 
     public <T> Observable<Boolean> deleteAllRx(Class<T> entityClass) {
         return Observable.fromCallable(() -> {
             AbstractDao<T, ?> abstractDao = getAbstractDao(entityClass);
             abstractDao.deleteAll();
+            com.tianma.xsmscode.feature.config.ConfigStore.changed();
             return true;
         });
     }

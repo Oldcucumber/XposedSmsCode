@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.github.tianma8023.xposed.smscode.BuildConfig;
 
-import de.robv.android.xposed.XposedBridge;
+import com.tianma.xsmscode.xp.modern.HookRuntime;
 
 public class XLog {
 

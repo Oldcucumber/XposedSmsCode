@@ -7,7 +7,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
-import de.robv.android.xposed.XposedHelpers;
+import com.tianma.xsmscode.xp.modern.Reflector;
 
 /**
  * Helper for InputMethod Input Characters.<br/>
@@ -72,15 +72,15 @@ public class InputHelper {
      */
     @SuppressLint("PrivateApi")
     private static void injectKeyEvent(KeyEvent keyEvent) throws Throwable {
-        InputManager inputManager = (InputManager) XposedHelpers.callStaticMethod(InputManager.class, "getInstance");
+        InputManager inputManager = (InputManager) Reflector.callStaticMethod(InputManager.class, "getInstance");
 
         int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH =
-                XposedHelpers.getStaticIntField(InputManager.class, "INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH");
+                Reflector.getStaticIntField(InputManager.class, "INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH");
 
         Class<?>[] paramTypes = {KeyEvent.class, int.class,};
         Object[] args = {keyEvent, INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH,};
 
-        XposedHelpers.callMethod(inputManager, "injectInputEvent", paramTypes, args);
+        Reflector.callMethod(inputManager, "injectInputEvent", paramTypes, args);
     }
 
 }

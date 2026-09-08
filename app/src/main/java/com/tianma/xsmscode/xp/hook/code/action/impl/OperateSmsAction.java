@@ -17,7 +17,7 @@ import com.tianma.xsmscode.xp.hook.code.action.CallableAction;
 
 import androidx.annotation.IntDef;
 import androidx.core.content.ContextCompat;
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 将验证码短信删除或者标记为已读
@@ -31,7 +31,7 @@ public class OperateSmsAction extends CallableAction {
     private @interface SmsOp {
     }
 
-    public OperateSmsAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public OperateSmsAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 

@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 自动输入验证码
  */
 public class AutoInputAction extends CallableAction {
 
-    public AutoInputAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public AutoInputAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 
@@ -58,33 +58,7 @@ public class AutoInputAction extends CallableAction {
     private boolean autoInputBlockedHere() {
         boolean result = false;
         try {
-            List<String> blockedAppList = new ArrayList<>();
-            try {
-                Uri appInfoUri = DBProvider.APP_INFO_URI;
-                ContentResolver resolver = mPluginContext.getContentResolver();
-
-                final String packageColumn = AppInfoDao.Properties.PackageName.columnName;
-                final String blockedColumn = AppInfoDao.Properties.Blocked.columnName;
-
-                String[] projection = {packageColumn,};
-                String selection = blockedColumn + " = ?";
-                String[] selectionArgs = {String.valueOf(1)};
-                Cursor cursor = resolver.query(appInfoUri, projection, selection, selectionArgs, null);
-                if (cursor != null) {
-                    while (cursor.moveToNext()) {
-                        blockedAppList.add(cursor.getString(cursor.getColumnIndexOrThrow(packageColumn)));
-                    }
-                    cursor.close();
-                }
-                XLog.d("Get blocked apps by content provider");
-            } catch (Exception e) {
-                List<AppInfo> appInfoList = EntityStoreManager
-                        .loadEntitiesFromFile(EntityType.BLOCKED_APP, AppInfo.class);
-                for (AppInfo appInfo : appInfoList) {
-                    blockedAppList.add(appInfo.getPackageName());
-                }
-                XLog.d("Get blocked apps from file");
-            }
+            List<String> blockedAppList = new ArrayList<>(((com.tianma.xsmscode.feature.config.ConfigSnapshot) xsp).blockedApps);
 
             if (blockedAppList.isEmpty()) {
                 return false;
@@ -103,7 +77,7 @@ public class AutoInputAction extends CallableAction {
 
             // RunningAppProcess 判断当前的进程不是很准确，所以用作次要参考
             List<ActivityManager.RunningAppProcessInfo> appProcesses = getRunningAppProcesses(mPhoneContext);
-            if (appProcesses == null) {
+            if (appProcesses == null || appProcesses.isEmpty()) {
                 return false;
             }
 

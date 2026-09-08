@@ -14,7 +14,7 @@ public class ModuleUtils {
      */
     public static int getModuleVersion() {
         XLog.d("getModuleVersion()");
-        return -1;
+        return com.tianma.xsmscode.feature.config.FrameworkService.connected() ? com.github.tianma8023.xposed.smscode.BuildConfig.MODULE_VERSION : -1;
     }
 
     /**

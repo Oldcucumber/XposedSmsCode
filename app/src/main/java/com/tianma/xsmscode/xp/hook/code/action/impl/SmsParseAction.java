@@ -15,7 +15,7 @@ import com.tianma.xsmscode.feature.store.EntityStoreManager;
 import com.tianma.xsmscode.feature.store.EntityType;
 import com.tianma.xsmscode.xp.hook.code.action.CallableAction;
 
-import de.robv.android.xposed.XSharedPreferences;
+import android.content.SharedPreferences;
 
 /**
  * 解析短信中的验证码
@@ -27,7 +27,7 @@ public class SmsParseAction extends CallableAction {
 
     private Intent mSmsIntent;
 
-    public SmsParseAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, XSharedPreferences xsp) {
+    public SmsParseAction(Context pluginContext, Context phoneContext, SmsMsg smsMsg, SharedPreferences xsp) {
         super(pluginContext, phoneContext, smsMsg, xsp);
     }
 
@@ -58,7 +58,8 @@ public class SmsParseAction extends CallableAction {
             return null;
         }
 
-        String smsCode = SmsCodeUtils.parseSmsCodeIfExists(mPluginContext, msgBody, true);
+        com.tianma.xsmscode.feature.config.ConfigSnapshot config = (com.tianma.xsmscode.feature.config.ConfigSnapshot) xsp;
+        String smsCode = com.tianma.xsmscode.core.CodeParser.parse(msgBody, XSPUtils.getSMSCodeKeywords(xsp), config.rules);
         if (TextUtils.isEmpty(smsCode)) { // isn't code message
             return null;
         }

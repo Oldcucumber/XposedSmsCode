@@ -34,6 +34,8 @@ public class SmsCodeApplication extends DaggerApplication {
                     .apply();
         }
 
+        com.tianma.xsmscode.feature.config.ConfigStore.init(this);
+        com.tianma.xsmscode.feature.config.FrameworkService.init(this);
         installDefaultEventBus();
         performTransitionTask();
     }
@@ -55,8 +57,9 @@ public class SmsCodeApplication extends DaggerApplication {
 
     // data transition task
     private void performTransitionTask() {
-        Executor singlePool = Executors.newSingleThreadExecutor();
-        singlePool.execute(new TransitionTask(this));
+        java.util.concurrent.ExecutorService singlePool = Executors.newSingleThreadExecutor();
+        singlePool.execute(() -> { try { new TransitionTask(this).run(); }
+            finally { com.tianma.xsmscode.feature.config.ConfigStore.changed(); singlePool.shutdown(); } });
     }
 
 }
