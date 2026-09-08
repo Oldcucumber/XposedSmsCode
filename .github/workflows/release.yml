@@ -1,0 +1,42 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (for example 2.5.2)
+        required: true
+        type: string
+      notes:
+        description: Release notes
+        required: false
+        type: string
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - uses: android-actions/setup-android@v3
+      - name: Build release APK
+        env:
+          ORG_GRADLE_PROJECT_tianma_keystore_path: ${{ github.workspace }}/release.jks
+          ORG_GRADLE_PROJECT_tianma_signature_path: ${{ github.workspace }}/signature.properties
+        run: |
+          echo '${{ secrets.RELEASE_KEYSTORE_BASE64 }}' | base64 --decode > release.jks
+          printf 'STORE_PASSWORD=%s\nKEY_ALIAS=%s\nKEY_PASSWORD=%s\n' "${{ secrets.RELEASE_STORE_PASSWORD }}" "${{ secrets.RELEASE_KEY_ALIAS }}" "${{ secrets.RELEASE_KEY_PASSWORD }}" > signature.properties
+          ./gradlew :app:assembleRelease --no-daemon
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: XposedSmsCode ${{ inputs.version }}
+          body: ${{ inputs.notes }}
+          files: app/build/outputs/apk/release/*.apk

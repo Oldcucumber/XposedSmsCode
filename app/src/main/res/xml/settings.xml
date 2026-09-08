@@ -225,6 +225,11 @@
             android:title="@string/pref_source_code_title"/>
 
         <Preference
+            android:key="developer_info"
+            android:title="@string/developer_info_title"
+            android:summary="@string/developer_info_summary" />
+
+        <Preference
             android:icon="@drawable/ic_alipay_red_packet"
             android:key="@string/pref_donate_by_alipay"
             android:title="@string/pref_donate_by_alipay_title"/>

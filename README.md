@@ -1,4 +1,13 @@
 # XposedSmsCode
+
+## legacy-APIupdate fork
+
+This repository is maintained by **Oldcucumber** as a compatibility-focused fork. It targets **libxposed API 102** while preserving the original interface, settings, parser behavior, and feature workflow. It adds JSON configuration backup/restore, retained-data migration, bounded SMS processing, safer notification intents, Android 15/16 permission adaptation, sensitive clipboard marking, and configuration-only system backup.
+
+Source and releases: https://github.com/Oldcucumber/XposedSmsCode
+
+The original author attribution and GPLv3 license are retained; original communication and donation links belong to the original author.
+
 ![Total Downloads](https://img.shields.io/github/downloads/tianma8023/XposedSmsCode/total) ![Total Stars](https://img.shields.io/github/stars/tianma8023/XposedSmsCode?style=social) [![Latest Release](https://img.shields.io/github/v/release/tianma8023/XposedSmsCode?label=Latest%20Release)](https://github.com/tianma8023/XposedSmsCode/releases)
 
 ![Star History Chart](https://api.star-history.com/svg?repos=tianma8023/XposedSmsCode&type=Date)

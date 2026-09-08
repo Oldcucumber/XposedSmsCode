@@ -121,6 +121,8 @@
     <string name="pref_source_code_title">Source code</string>
     <string name="browser_install_or_enable_prompt">Please install or enable browser first</string>
     <string name="pref_source_code_summary">Welcome to star ♪(＾∀＾●)ﾉ</string>
+    <string name="developer_info_title">Developer / fork maintainer</string>
+    <string name="developer_info_summary">Oldcucumber · legacy-APIupdate · github.com/Oldcucumber/XposedSmsCode</string>
     <string name="pref_donate_by_alipay_title">Donate by Alipay</string>
     <string name="alipay_install_prompt">Please install Alipay</string>
     <string name="alipay_enable_prompt">Please enable Alipay</string>

@@ -300,4 +300,6 @@
     <string name="privacy_dialog_cancel">拒绝</string>
     <string name="privacy_dialog_confirm">同意和接受</string>
     <!-- privacy policy end -->
+    <string name="developer_info_title">开发者 / fork 维护者</string>
+    <string name="developer_info_summary">Oldcucumber · legacy-APIupdate · github.com/Oldcucumber/XposedSmsCode</string>
 </resources>
