@@ -1,6 +1,7 @@
 -keep public class com.tianma.xsmscode.xp.HookEntry { public <init>(); }
 -dontwarn io.github.libxposed.annotation.**
 -keepattributes Signature,InnerClasses,EnclosingMethod
+-keepclassmembers class com.jaredrummler.cyanea.Cyanea { private void loadDefaults(); }
 # ==========================
 # Umeng analyze proguard start
 

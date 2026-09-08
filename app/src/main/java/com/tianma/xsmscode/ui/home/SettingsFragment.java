@@ -55,6 +55,7 @@ public class SettingsFragment extends BasePreferenceFragment implements
     static final String ACTION_DONATE_BY_ALIPAY = "donate_by_alipay";
 
     private HomeActivity mActivity;
+    private final com.tianma.xsmscode.feature.config.ConfigBackupUi configBackup = new com.tianma.xsmscode.feature.config.ConfigBackupUi(this);
 
     @Inject
     DispatchingAndroidInjector<Object> androidInjector;
@@ -97,6 +98,7 @@ public class SettingsFragment extends BasePreferenceFragment implements
     @Override
     protected void doOnCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings);
+        findPreference("config_backup").setOnPreferenceClickListener(p -> { configBackup.show(); return true; });
 
         // general group
         if (!ModuleUtils.isModuleEnabled()) {

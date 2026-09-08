@@ -1,0 +1,13 @@
+<resources>
+    <string name="config_backup_title">設定備份</string>
+    <string name="config_backup_export">匯出 JSON</string>
+    <string name="config_backup_import">匯入 JSON</string>
+    <string name="config_backup_summary">備份設定、主題、規則和封鎖名單，不含驗證碼歷史和記錄檔</string>
+    <string name="config_backup_replace">使用備份取代目前設定、規則和封鎖名單？驗證碼歷史保持不變。</string>
+    <string name="config_backup_success">備份操作完成</string>
+    <string name="config_backup_failed">備份操作失敗，請檢查檔案與存取權限。中斷的還原會在下次啟動時復原。</string>
+    <string name="fork_not_configured">此測試版尚未設定 fork 儲存庫位址。</string>
+    <string name="config_not_synced">API 102 設定尚未同步，請在相容框架中啟用模組後重新開啟應用程式。</string>
+    <string name="original_author_group">原作者交流群組</string>
+    <string name="original_author_donation">支持原作者</string>
+</resources>

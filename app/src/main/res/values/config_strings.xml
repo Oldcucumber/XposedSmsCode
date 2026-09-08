@@ -1,0 +1,14 @@
+<resources>
+    <string name="config_backup_title">Settings backup</string>
+    <string name="config_backup_export">Export JSON</string>
+    <string name="config_backup_import">Import JSON</string>
+    <string name="config_backup_summary">Settings, theme, rules and blocked apps; excludes code history and logs</string>
+    <string name="config_backup_replace">Replace current settings, rules and blocked apps with this backup? Code history will remain unchanged.</string>
+    <string name="config_backup_success">Backup operation completed</string>
+    <string name="config_backup_failed">Backup failed. Check the file and access permission. An interrupted restore is recovered when the app next starts.</string>
+    <string name="fork_not_configured">Fork repository is not configured in this test build.</string>
+    <string name="config_not_synced">API 102 configuration is not synchronized. Enable this module in a compatible framework and reopen the app.</string>
+    <string name="original_author_group">Original author’s group</string>
+    <string name="original_author_donation">Support the original author</string>
+    <string-array name="config_backup_actions"><item>@string/config_backup_export</item><item>@string/config_backup_import</item></string-array>
+</resources>
