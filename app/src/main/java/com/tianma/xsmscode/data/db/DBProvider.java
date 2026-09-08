@@ -90,7 +90,8 @@ public class DBProvider extends ContentProvider {
         if (mContext != null) {
             mContext.getContentResolver().notifyChange(uri, null);
         }
-        return Uri.parse(path);
+        if (id < 0) throw new android.database.SQLException("Insert failed");
+        return android.content.ContentUris.withAppendedId(uri, id);
     }
 
     @Nullable

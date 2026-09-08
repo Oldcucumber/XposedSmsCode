@@ -25,7 +25,7 @@ public class DBManager {
 
     private static final String DB_NAME = "sms-code.db";
 
-    private static DBManager sInstance;
+    private static volatile DBManager sInstance;
 
     private DaoSession mDaoSession;
     private SQLiteDatabase mSQLiteDatabase;
