@@ -17,6 +17,9 @@ public class ClipboardUtils {
             return;
         }
         ClipData clipData = ClipData.newPlainText("Copy text", text);
+        android.os.PersistableBundle extras = new android.os.PersistableBundle();
+        extras.putBoolean("android.content.extra.IS_SENSITIVE", true);
+        clipData.getDescription().setExtras(extras);
         cm.setPrimaryClip(clipData);
         XLog.i("Copy to clipboard succeed");
     }
