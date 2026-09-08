@@ -1,120 +1,61 @@
-apply plugin: 'com.android.application'
-apply plugin: 'org.greenrobot.greendao' // apply greenDao plugin
-apply from: 'and-res-guard.gradle'
+plugins { id 'com.android.application' }
 
-def keyFile = file(findProperty("tianma.keystore.path") as String)
-def propertyFile = file(findProperty("tianma.signature.path") as String)
-
+def signingPath = providers.gradleProperty('tianma.signature.path').orNull
+def signingFile = signingPath ? file(signingPath) : null
 def keyProps = new Properties()
-if (propertyFile.exists()) {
-    keyProps.load(new FileInputStream(propertyFile))
-}
-
-def static releaseTime() {
-    return new Date().format("yyMMdd", TimeZone.default)
-}
-
-def VERSION_NAME = "2.5.1"
-def VERSION_CODE = 52
+if (signingFile?.isFile()) signingFile.withInputStream { keyProps.load(it) }
+def keyPath = providers.gradleProperty('tianma.keystore.path').orNull
 
 android {
-    namespace 'com.github.tianma8023.xposed.smscode'
-
-    compileSdk 34
+    namespace = 'com.github.tianma8023.xposed.smscode'
+    compileSdk = 37
     defaultConfig {
-        applicationId "com.github.tianma8023.xposed.smscode"
-        minSdkVersion 23
-        targetSdkVersion 34
-        versionCode VERSION_CODE
-        versionName VERSION_NAME
-
-        buildConfigField("String", "LOG_TAG", "\"XSmsCode\"")
-        buildConfigField("int", "MODULE_VERSION", "" + VERSION_CODE)
-        resConfigs 'en', 'zh-rCN', 'zh-rTW'
-
-        // vectorDrawables.generatedDensities = ['hdpi']
-
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [ eventBusIndex : 'com.tianma.xsmscode.data.eventbus.MyEventBusIndex' ]
-            }
-        }
+        applicationId = 'com.github.tianma8023.xposed.smscode'
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 53
+        versionName = '2.5.2-legacy-APIupdate.1'
+        buildConfigField 'String', 'LOG_TAG', '\"XSmsCode\"'
+        buildConfigField 'int', 'MODULE_VERSION', '53'
+        buildConfigField 'String', 'FORK_REPOSITORY', '\"' + providers.gradleProperty('fork.repository').getOrElse('') + '\"'
+        javaCompileOptions.annotationProcessorOptions.arguments = [eventBusIndex: 'com.tianma.xsmscode.data.eventbus.MyEventBusIndex']
     }
-
+    buildFeatures { buildConfig = true }
+    androidResources { localeFilters += ['en', 'zh-rCN', 'zh-rTW'] }
     signingConfigs {
         release {
-            storeFile keyFile
-            storePassword keyProps['STORE_PASSWORD']
-            keyAlias keyProps['KEY_ALIAS']
-            keyPassword keyProps['KEY_PASSWORD']
+            if (keyPath && signingFile?.isFile()) {
+                storeFile = file(keyPath)
+                storePassword = keyProps['STORE_PASSWORD']
+                keyAlias = keyProps['KEY_ALIAS']
+                keyPassword = keyProps['KEY_PASSWORD']
+            }
         }
     }
-
     buildTypes {
         debug {
-            buildConfigField("int", "LOG_LEVEL", "2")
-            buildConfigField("boolean", "LOG_TO_XPOSED", "true")
-
-            if (keyFile.exists()) {
-                signingConfig signingConfigs.release
-            }
+            buildConfigField 'int', 'LOG_LEVEL', '2'
+            buildConfigField 'boolean', 'LOG_TO_XPOSED', 'true'
         }
-
-        alpha {
-            minifyEnabled true
-            shrinkResources true
-            zipAlignEnabled true
-            debuggable  true
-
-            buildConfigField("int", "LOG_LEVEL", "2")
-            buildConfigField("boolean", "LOG_TO_XPOSED", "true")
-
-            if (keyFile.exists()) {
-                signingConfig signingConfigs.release
-            }
-
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-
         release {
-            minifyEnabled true
-            shrinkResources true
-            zipAlignEnabled true
-
-            buildConfigField("int", "LOG_LEVEL", "4")
-            buildConfigField("boolean", "LOG_TO_XPOSED", "true")
-            if (keyFile.exists()) {
-                signingConfig signingConfigs.release
-            }
-
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-            lintOptions {
-                disable 'MissingTranslation'
-                checkReleaseBuilds false
-            }
-
-            packagingOptions {
-                exclude '**/*.kotlin_*'
-            }
+            minifyEnabled = true
+            shrinkResources = true
+            buildConfigField 'int', 'LOG_LEVEL', '4'
+            buildConfigField 'boolean', 'LOG_TO_XPOSED', 'true'
+            if (keyPath && signingFile?.isFile()) signingConfig = signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        alpha {
+            initWith release
+            signingConfig = signingConfigs.debug
+            matchingFallbacks = ['release']
         }
     }
-
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            output.outputFileName = "XposedSmsCode_v${variant.versionName.replaceAll('\\s+', '_')}_${releaseTime()}_${variant.buildType.name.charAt(0)}.apk"
-        }
-    }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-}
-
-greendao {
-    schemaVersion 8
+    lint { disable += 'MissingTranslation' }
 }
 
 ext {
