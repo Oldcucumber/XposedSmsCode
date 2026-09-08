@@ -10,8 +10,6 @@ public interface SettingsContract {
 
     interface View extends BaseView {
 
-        void showGetAlipayPacketDialog();
-
         void showSmsCodeTestResult(String code);
 
         void showCheckError(Throwable t);
@@ -32,8 +30,6 @@ public interface SettingsContract {
         void hideOrShowLauncherIcon(boolean hide);
 
         void performSmsCodeTest(String msgBody);
-
-        void joinQQGroup();
 
         void showSourceProject();
 

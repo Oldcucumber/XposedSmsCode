@@ -7,16 +7,6 @@ import com.github.tianma8023.xposed.smscode.BuildConfig;
  */
 public interface Const {
 
-    /* Alipay begin */
-    String ALIPAY_PACKAGE_NAME = "com.eg.android.AlipayGphone";
-    String ALIPAY_QRCODE_URI_PREFIX = "alipayqr://platformapi/startapp?saId=10000007&qrcode=";
-    String ALIPAY_QRCODE_URL = "HTTPS://QR.ALIPAY.COM/FKX074142EKXD0OIMV8B60";
-    /* Alipay end */
-
-    /* QQ begin */
-    String QQ_GROUP_KEY = "jWGrWgSGLGQ0NyyRsKqRlrApRCzecuNA";
-    /* QQ end */
-
     /* Xposed SmsCode begin */
     String HOME_ACTIVITY_ALIAS = BuildConfig.APPLICATION_ID + ".HomeActivityAlias";
 

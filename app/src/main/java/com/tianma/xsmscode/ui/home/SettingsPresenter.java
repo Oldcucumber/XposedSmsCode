@@ -1,6 +1,5 @@
 package com.tianma.xsmscode.ui.home;
 
-import static com.tianma.xsmscode.ui.home.SettingsFragment.ACTION_DONATE_BY_ALIPAY;
 import static com.tianma.xsmscode.ui.home.SettingsFragment.EXTRA_ACTION;
 
 import android.content.ComponentName;
@@ -68,11 +67,7 @@ public class SettingsPresenter implements SettingsContract.Presenter {
             return;
         }
 
-        String extraAction = args.getString(EXTRA_ACTION);
-        if (ACTION_DONATE_BY_ALIPAY.equals(extraAction)) {
-            args.remove(EXTRA_ACTION);
-            mView.showGetAlipayPacketDialog();
-        }
+        args.remove(EXTRA_ACTION);
     }
 
     @Override
@@ -104,11 +99,6 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                 .subscribe(code -> mView.showSmsCodeTestResult(code),
                         throwable -> mView.showSmsCodeTestResult(""));
         mCompositeDisposable.add(disposable);
-    }
-
-    @Override
-    public void joinQQGroup() {
-        PackageUtils.joinQQGroup(mContext);
     }
 
     @Override

@@ -66,18 +66,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void handleIntent(Intent intent) {
-        String action = intent.getAction();
-        SettingsFragment settingsFragment = null;
-        if (Intent.ACTION_VIEW.equals(action)) {
-            String extraAction = intent.getStringExtra(SettingsFragment.EXTRA_ACTION);
-            if (SettingsFragment.ACTION_DONATE_BY_ALIPAY.equals(extraAction)) {
-                settingsFragment = SettingsFragment.newInstance(extraAction);
-            }
-        }
-
-        if (settingsFragment == null) {
-            settingsFragment = SettingsFragment.newInstance();
-        }
+        SettingsFragment settingsFragment = SettingsFragment.newInstance();
 
         mFragmentManager = getSupportFragmentManager();
         mFragmentManager.beginTransaction()

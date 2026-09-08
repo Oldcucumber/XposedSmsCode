@@ -23,7 +23,6 @@ import com.tianma.xsmscode.common.constant.PrefConst;
 import com.tianma.xsmscode.common.preference.ResetEditPreference;
 import com.tianma.xsmscode.common.preference.ResetEditPreferenceDialogFragCompat;
 import com.tianma.xsmscode.common.utils.ModuleUtils;
-import com.tianma.xsmscode.common.utils.PackageUtils;
 import com.tianma.xsmscode.common.utils.SPUtils;
 import com.tianma.xsmscode.common.utils.SnackbarHelper;
 import com.tianma.xsmscode.common.utils.XLog;
@@ -52,7 +51,6 @@ public class SettingsFragment extends BasePreferenceFragment implements
         SettingsContract.View {
 
     static final String EXTRA_ACTION = "extra_action";
-    static final String ACTION_DONATE_BY_ALIPAY = "donate_by_alipay";
 
     private HomeActivity mActivity;
     private final com.tianma.xsmscode.feature.config.ConfigBackupUi configBackup = new com.tianma.xsmscode.feature.config.ConfigBackupUi(this);
@@ -145,9 +143,7 @@ public class SettingsFragment extends BasePreferenceFragment implements
         Preference versionPref = findPreference(PrefConst.KEY_VERSION);
         versionPref.setOnPreferenceClickListener(this);
         showVersionInfo(versionPref);
-        findPreference(PrefConst.KEY_JOIN_QQ_GROUP).setOnPreferenceClickListener(this);
         findPreference(PrefConst.KEY_SOURCE_CODE).setOnPreferenceClickListener(this);
-        findPreference(PrefConst.KEY_DONATE_BY_ALIPAY).setOnPreferenceClickListener(this);
         findPreference(PrefConst.KEY_PRIVACY_POLICY).setOnPreferenceClickListener(this);
         // about group end
     }
@@ -183,12 +179,8 @@ public class SettingsFragment extends BasePreferenceFragment implements
             CodeRulesActivity.startToMe(mActivity);
         } else if (PrefConst.KEY_SMSCODE_TEST.equals(key)) {
             showSmsCodeTestDialog();
-        } else if (PrefConst.KEY_JOIN_QQ_GROUP.equals(key)) {
-            mPresenter.joinQQGroup();
         } else if (PrefConst.KEY_SOURCE_CODE.equals(key)) {
             mPresenter.showSourceProject();
-        } else if (PrefConst.KEY_DONATE_BY_ALIPAY.equals(key)) {
-            donateByAlipay();
         } else if (PrefConst.KEY_ENTRY_CODE_RECORDS.equals(key)) {
             CodeRecordActivity.startToMe(mActivity);
         } else if (PrefConst.KEY_APP_BLOCK_ENTRY.equals(key)) {
@@ -206,16 +198,6 @@ public class SettingsFragment extends BasePreferenceFragment implements
     private void showVersionInfo(Preference preference) {
         String summary = getString(R.string.pref_version_summary, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
         preference.setSummary(summary);
-    }
-
-    private void donateByAlipay() {
-        new MaterialDialog.Builder(mActivity)
-                .title(R.string.dialog_donate_by_alipay_title)
-                .content(R.string.dialog_donate_by_alipay_content)
-                .positiveText(R.string.dialog_donate_confirm)
-                .onPositive((dialog, which) -> PackageUtils.startAlipayDonatePage(mActivity))
-                .negativeText(R.string.dialog_donate_cancel)
-                .show();
     }
 
     @Override
@@ -269,12 +251,6 @@ public class SettingsFragment extends BasePreferenceFragment implements
     private void initRecordEntryPreference(Preference preference) {
         String summary = getString(R.string.pref_entry_code_records_summary, PrefConst.MAX_SMS_RECORDS_COUNT_DEFAULT);
         preference.setSummary(summary);
-    }
-
-    @Override
-    public void showGetAlipayPacketDialog() {
-        scrollToPreference(PrefConst.KEY_DONATE_BY_ALIPAY);
-        donateByAlipay();
     }
 
     @Override
