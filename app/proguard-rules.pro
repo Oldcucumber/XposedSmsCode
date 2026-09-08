@@ -46,6 +46,9 @@
 # greenDAO 3 proguard start
 ### greenDAO 3
 ### GreenDaoUpgradeHelper
+-keep class com.tianma.xsmscode.data.db.entity.AppInfoDao { *; }
+-keep class com.tianma.xsmscode.data.db.entity.SmsCodeRuleDao { *; }
+-keep class com.tianma.xsmscode.data.db.entity.SmsMsgDao { *; }
 -keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
     public static java.lang.String TABLENAME;
     public static void dropTable(org.greenrobot.greendao.database.Database, boolean);
