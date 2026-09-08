@@ -8,9 +8,9 @@
 
 ? fork ???????? GPLv3 ??????????????????
 
-![Total Downloads](https://img.shields.io/github/downloads/tianma8023/XposedSmsCode/total) ![Total Stars](https://img.shields.io/github/stars/tianma8023/XposedSmsCode?style=social) [![Latest Release](https://img.shields.io/github/v/release/tianma8023/XposedSmsCode?label=Latest%20Release)](https://github.com/tianma8023/XposedSmsCode/releases)
+![Total Downloads](https://img.shields.io/github/downloads/Oldcucumber/XposedSmsCode/total) ![Total Stars](https://img.shields.io/github/stars/Oldcucumber/XposedSmsCode?style=social) [![Latest Release](https://img.shields.io/github/v/release/Oldcucumber/XposedSmsCode?label=Latest%20Release)](https://github.com/Oldcucumber/XposedSmsCode/releases)
 
-![Star History Chart](https://api.star-history.com/svg?repos=tianma8023/XposedSmsCode&type=Date)
+![Star History Chart](https://api.star-history.com/svg?repos=Oldcucumber/XposedSmsCode&type=Date)
 
 识别短信验证码的Xposed模块，并将验证码拷贝到剪切板，亦可以自动输入验证码。
 
@@ -21,7 +21,7 @@
 
 # 下载
 下载地址:
-- [GitHub Releases](https://github.com/tianma8023/XposedSmsCode/releases)
+- [GitHub Releases](https://github.com/Oldcucumber/XposedSmsCode/releases)
 - [LSPosed仓库](https://github.com/Xposed-Modules-Repo/com.github.tianma8023.xposed.smscode/releases/)
 - ~~[酷安](https://www.coolapk.com/apk/com.github.tianma8023.xposed.smscode)~~
 - ~~[Xposed仓库](http://repo.xposed.info/module/com.github.tianma8023.xposed.smscode)~~

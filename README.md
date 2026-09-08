@@ -8,9 +8,9 @@ Source and releases: https://github.com/Oldcucumber/XposedSmsCode
 
 The original author attribution and GPLv3 license are retained; original communication and donation links belong to the original author.
 
-![Total Downloads](https://img.shields.io/github/downloads/tianma8023/XposedSmsCode/total) ![Total Stars](https://img.shields.io/github/stars/tianma8023/XposedSmsCode?style=social) [![Latest Release](https://img.shields.io/github/v/release/tianma8023/XposedSmsCode?label=Latest%20Release)](https://github.com/tianma8023/XposedSmsCode/releases)
+![Total Downloads](https://img.shields.io/github/downloads/Oldcucumber/XposedSmsCode/total) ![Total Stars](https://img.shields.io/github/stars/Oldcucumber/XposedSmsCode?style=social) [![Latest Release](https://img.shields.io/github/v/release/Oldcucumber/XposedSmsCode?label=Latest%20Release)](https://github.com/Oldcucumber/XposedSmsCode/releases)
 
-![Star History Chart](https://api.star-history.com/svg?repos=tianma8023/XposedSmsCode&type=Date)
+![Star History Chart](https://api.star-history.com/svg?repos=Oldcucumber/XposedSmsCode&type=Date)
 
 An Xposed module which can recognize, parse SMS code and copy it to clipboard when a new message arrives. It can also input SMS code automatically.
 
@@ -20,8 +20,8 @@ An Xposed module which can recognize, parse SMS code and copy it to clipboard wh
 <img src="./art/en/01.png" width="180"/><img src="./art/en/02.png" width="180"/><img src="./art/en/03.png" width="180"/>
 
 # Download
-- [GitHub Releases](https://github.com/tianma8023/XposedSmsCode/releases)
-- [LSPosed Repository](https://github.com/Xposed-Modules-Repo/com.github.tianma8023.xposed.smscode/releases/)
+- [GitHub Releases](https://github.com/Oldcucumber/XposedSmsCode/releases)
+- LSPosed module: install the APK from GitHub Releases and enable it in LSPosed
 - ~~[Coolapk](https://www.coolapk.com/apk/com.github.tianma8023.xposed.smscode)~~
 - ~~[Xposed Repository](http://repo.xposed.info/module/com.github.tianma8023.xposed.smscode)~~
 
