@@ -1,0 +1,8 @@
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="config-backup/configuration.json" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="config-backup/configuration.json" />
+    </device-transfer>
+</data-extraction-rules>

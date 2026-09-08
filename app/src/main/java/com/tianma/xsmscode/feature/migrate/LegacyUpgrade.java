@@ -10,6 +10,7 @@ import java.nio.file.Files;
 public final class LegacyUpgrade {
     public static void run(Context context) throws IOException {
         ConfigurationBackup.recover(context);
+        if (context.getSharedPreferences("apiupdate_migration", Context.MODE_PRIVATE).getBoolean("retained_v1", false)) return;
         File external = context.getExternalFilesDir(null);
         if (external != null && external.isDirectory()) {
             File[] files = external.listFiles();
