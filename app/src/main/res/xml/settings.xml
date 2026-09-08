@@ -213,12 +213,6 @@
             android:title="@string/pref_version_title"/>
 
         <Preference
-            android:icon="@drawable/ic_qq_group"
-            android:key="@string/pref_join_qq_group"
-            android:summary="@string/pref_join_qq_group_summary"
-            android:title="@string/pref_join_qq_group_title"/>
-
-        <Preference
             android:icon="@drawable/ic_source_code"
             android:key="@string/pref_source_code"
             android:summary="@string/pref_source_code_summary"
@@ -228,11 +222,6 @@
             android:key="developer_info"
             android:title="@string/developer_info_title"
             android:summary="@string/developer_info_summary" />
-
-        <Preference
-            android:icon="@drawable/ic_alipay_red_packet"
-            android:key="@string/pref_donate_by_alipay"
-            android:title="@string/pref_donate_by_alipay_title"/>
 
         <Preference
             android:icon="@drawable/ic_privacy_tip"
