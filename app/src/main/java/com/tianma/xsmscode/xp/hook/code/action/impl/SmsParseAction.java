@@ -72,23 +72,6 @@ public class SmsParseAction extends CallableAction {
         bundle.putParcelable(SMS_MSG, mSmsMsg);
 
         // 去除重复短信
-        boolean duplicated = false;
-        if (XSPUtils.deduplicateSms(xsp)) {
-            SmsMsg prevSmsMsg = EntityStoreManager.loadEntityFromFile(EntityType.PREV_SMS_MSG, SmsMsg.class);
-            if (prevSmsMsg != null) {
-                if (Math.abs(timestamp - prevSmsMsg.getDate()) <= 15000) {
-                    if ((sender.equals(prevSmsMsg.getSender()) && smsCode.equals(prevSmsMsg.getSmsCode()))
-                            || msgBody.equals(prevSmsMsg.getBody())) {
-                        duplicated = true;
-                        XLog.d("Duplicated message, ignore");
-                    }
-                }
-            }
-            // 保存当前验证码记录 Action
-            EntityStoreManager.storeEntityToFile(EntityType.PREV_SMS_MSG, mSmsMsg);
-        }
-
-        bundle.putBoolean(SMS_DUPLICATED, duplicated);
         return bundle;
     }
 

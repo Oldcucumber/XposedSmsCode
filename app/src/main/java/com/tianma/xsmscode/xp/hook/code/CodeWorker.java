@@ -38,7 +38,24 @@ public class CodeWorker {
 
     private final Handler mUIHandler;
 
-    private final ScheduledExecutorService mScheduledExecutor;
+    private static final com.tianma.xsmscode.core.BoundedParser PARSER = new com.tianma.xsmscode.core.BoundedParser();
+    private static final ScheduledExecutorService ACTIONS = Executors.newScheduledThreadPool(2);
+    private static final java.util.concurrent.Semaphore CAPACITY = new java.util.concurrent.Semaphore(128);
+    private static SmsMsg previous;
+    private static synchronized boolean duplicated(SmsMsg msg) {
+        boolean duplicate = previous != null && Math.abs(msg.getDate() - previous.getDate()) <= 15000
+            && ((msg.getSender().equals(previous.getSender()) && msg.getSmsCode().equals(previous.getSmsCode()))
+            || msg.getBody().equals(previous.getBody()));
+        previous = msg;
+        return duplicate;
+    }
+    private static void schedule(Runnable action, long delay) {
+        if (!CAPACITY.tryAcquire()) { XLog.e("Action queue full; skip optional action"); return; }
+        try {
+            ACTIONS.schedule(() -> { try { action.run(); } finally { CAPACITY.release(); } },
+                Math.max(0, delay), TimeUnit.MILLISECONDS);
+        } catch (RuntimeException e) { CAPACITY.release(); XLog.e("Schedule failed", e); }
+    }
 
     CodeWorker(Context pluginContext, Context phoneContext, Intent smsIntent) {
         mPluginContext = pluginContext;
@@ -48,7 +65,7 @@ public class CodeWorker {
 
         mUIHandler = new Handler(Looper.getMainLooper());
 
-        mScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
     }
 
     public ParseResult parse() {
@@ -66,29 +83,12 @@ public class CodeWorker {
 
         SmsParseAction smsParseAction = new SmsParseAction(mPluginContext, mPhoneContext, null, xsp);
         smsParseAction.setSmsIntent(mSmsIntent);
-        ScheduledFuture<Bundle> smsParseFuture = mScheduledExecutor.schedule(smsParseAction, 0, TimeUnit.MILLISECONDS);
+        Bundle parsed = PARSER.evaluate(smsParseAction, 200);
+        if (parsed == null) return null;
+        final SmsMsg smsMsg = parsed.getParcelable(SmsParseAction.SMS_MSG);
+        if (smsMsg == null) return null;
+        if (XSPUtils.deduplicateSms(xsp) && duplicated(smsMsg)) return buildParseResult();
 
-        final SmsMsg smsMsg;
-        try {
-            Bundle parseBundle = smsParseFuture.get();
-            if (parseBundle == null) {
-                // the SMS message doesn't contain verification code
-                return null;
-            }
-
-            boolean duplicated = parseBundle.getBoolean(SmsParseAction.SMS_DUPLICATED, false);
-            if (duplicated) {
-                return buildParseResult();
-            }
-
-            smsMsg = parseBundle.getParcelable(SmsParseAction.SMS_MSG);
-        } catch (Exception e) {
-            XLog.e("Error occurs when get SmsParseAction call value", e);
-            return null;
-        }
-
-
-        // 复制到剪切板 Action
         mUIHandler.post(new CopyToClipboardAction(mPluginContext, mPhoneContext, smsMsg, xsp));
 
         // 显示Toast Action
@@ -98,39 +98,21 @@ public class CodeWorker {
         if (XSPUtils.autoInputCodeEnabled(xsp)) {
             AutoInputAction autoInputAction = new AutoInputAction(mPluginContext, mPhoneContext, smsMsg, xsp);
             long autoInputDelay = XSPUtils.getAutoInputCodeDelay(xsp) * 1000L;
-            mScheduledExecutor.schedule(autoInputAction, autoInputDelay, TimeUnit.MILLISECONDS);
+            schedule(() -> autoInputAction.call(), autoInputDelay);
         }
 
         // 显示通知 Action
-        NotifyAction notifyAction = new NotifyAction(mPluginContext, mPhoneContext, smsMsg, xsp);
-        ScheduledFuture<Bundle> notificationFuture = mScheduledExecutor.schedule(notifyAction, 0, TimeUnit.MILLISECONDS);
-
-        // 记录验证码短信 Action
-        RecordSmsAction recordSmsAction = new RecordSmsAction(mPluginContext, mPhoneContext, smsMsg, xsp);
-        mScheduledExecutor.schedule(recordSmsAction, 0, TimeUnit.MILLISECONDS);
-
-        // 操作验证码短信（标记为已读 或者 删除） Action
-        OperateSmsAction operateSmsAction = new OperateSmsAction(mPluginContext, mPhoneContext, smsMsg, xsp);
-        mScheduledExecutor.schedule(operateSmsAction, 3000, TimeUnit.MILLISECONDS);
-
-        // 自杀 Action
-        KillMeAction action = new KillMeAction(mPluginContext, mPhoneContext, smsMsg, xsp);
-        mScheduledExecutor.schedule(action, 4000, TimeUnit.MILLISECONDS);
-
-        try {
-            // 清除通知
-            Bundle bundle = notificationFuture.get();
-            if (bundle != null && bundle.containsKey(NotifyAction.NOTIFY_RETENTION_TIME)) {
-                long delay = bundle.getLong(NotifyAction.NOTIFY_RETENTION_TIME, 0L);
-                int notificationId = bundle.getInt(NotifyAction.NOTIFY_ID, 0);
-                CancelNotifyAction cancelNotifyAction = new CancelNotifyAction(mPluginContext, mPhoneContext, smsMsg, xsp);
-                cancelNotifyAction.setNotificationId(notificationId);
-
-                mScheduledExecutor.schedule(cancelNotifyAction, delay, TimeUnit.MILLISECONDS);
+        schedule(() -> {
+            Bundle notification = new NotifyAction(mPluginContext, mPhoneContext, smsMsg, xsp).call();
+            if (notification != null && notification.containsKey(NotifyAction.NOTIFY_RETENTION_TIME)) {
+                CancelNotifyAction cancel = new CancelNotifyAction(mPluginContext, mPhoneContext, smsMsg, xsp);
+                cancel.setNotificationId(notification.getInt(NotifyAction.NOTIFY_ID));
+                schedule(() -> cancel.call(), notification.getLong(NotifyAction.NOTIFY_RETENTION_TIME));
             }
-        } catch (Exception e) {
-            XLog.e("Error in notification future get()", e);
-        }
+        }, 0);
+        schedule(() -> new RecordSmsAction(mPluginContext, mPhoneContext, smsMsg, xsp).call(), 0);
+        schedule(() -> new OperateSmsAction(mPluginContext, mPhoneContext, smsMsg, xsp).call(), 3000);
+        schedule(() -> new KillMeAction(mPluginContext, mPhoneContext, smsMsg, xsp).call(), 4000);
 
         return buildParseResult();
     }
