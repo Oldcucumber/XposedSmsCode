@@ -207,34 +207,23 @@ public class SmsHandlerHook extends BaseHook {
             return;
         }
 
-        Method[] methods = inboundSmsHandlerClass.getDeclaredMethods();
-        Method exactMethod = null;
-        final String DISPATCH_INTENT = "dispatchIntent";
-        int receiverIndex = 0;
-        for (Method method : methods) {
-            String methodName = method.getName();
-            if (DISPATCH_INTENT.equals(methodName)) {
-                exactMethod = method;
-
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                for (int i = 0; i < parameterTypes.length; i++) {
-                    Class<?> parameterType = parameterTypes[i];
-                    if (BroadcastReceiver.class.isAssignableFrom(parameterType)) {
-                        // 是否是 BroadcastReceiver 或者其 子类
-                        receiverIndex = i;
-                    }
-                }
-
-                break;
+        Method target = null;
+        int receiverIndex = -1;
+        for (Method method : inboundSmsHandlerClass.getDeclaredMethods()) {
+            Class<?>[] types = method.getParameterTypes();
+            if (!method.getName().equals("dispatchIntent") || method.getReturnType() != void.class
+                    || types.length == 0 || types[0] != Intent.class) continue;
+            int found = -1;
+            for (int i = 1; i < types.length; i++) if (BroadcastReceiver.class.isAssignableFrom(types[i])) {
+                if (found != -1) { found = -2; break; }
+                found = i;
             }
+            if (found < 0) continue;
+            if (target != null) { XLog.e("Ambiguous dispatchIntent signature; preserve SMS delivery"); return; }
+            target = method; receiverIndex = found;
         }
-
-        if (exactMethod == null) {
-            XLog.e("Method %s for Class %s cannot found", DISPATCH_INTENT, SMS_HANDLER_CLASS);
-            return;
-        }
-
-        XposedWrapper.hookMethod(exactMethod, new DispatchIntentHook(receiverIndex));
+        if (target == null) { XLog.e("No supported SMS dispatch signature"); return; }
+        XposedWrapper.hookMethod(target, new DispatchIntentHook(receiverIndex));
     }
 
     private class ConstructorHook extends HookCallback {
@@ -250,7 +239,10 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void afterConstructorHandler(HookCallback.MethodHookParam param) {
-        Context context = (Context) param.args[1];
+        if (param.hasThrowable()) return;
+        Context context = null;
+        for (Object arg : param.args) if (arg instanceof Context) { context = (Context) arg; break; }
+        if (context == null) return;
         if (mPhoneContext == null) {
             mPhoneContext = context;
             try {
@@ -298,6 +290,9 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void beforeDispatchIntentHandler(HookCallback.MethodHookParam param, int receiverIndex) {
+        if (mPhoneContext == null || !(param.args[0] instanceof Intent)) return;
+        android.os.UserManager users = mPhoneContext.getSystemService(android.os.UserManager.class);
+        if (users == null || !users.isUserUnlocked() || getPluginContext() == null) return;
         Intent intent = (Intent) param.args[0];
         String action = intent.getAction();
 
@@ -311,25 +306,29 @@ public class SmsHandlerHook extends BaseHook {
         if (parseResult != null) {// parse succeed
             if (parseResult.isBlockSms()) {
                 XLog.d("Blocking code SMS...");
-                deleteRawTableAndSendMessage(param.thisObject, param.args[receiverIndex]);
-                param.setResult(null);
+                if (deleteRawTableAndSendMessage(param.thisObject, param.args[receiverIndex])) param.setResult(null);
             }
         }
     }
 
     private static final int EVENT_BROADCAST_COMPLETE = 3;
 
-    private void deleteRawTableAndSendMessage(Object inboundSmsHandler, Object smsReceiver) {
+    private boolean deleteRawTableAndSendMessage(Object inboundSmsHandler, Object smsReceiver) {
+        if (smsReceiver == null) return false;
         long token = Binder.clearCallingIdentity();
         try {
+            // Validate the completion method before mutating the raw table.
+            Reflector.findMethodBestMatch(inboundSmsHandler.getClass(), "sendMessage", EVENT_BROADCAST_COMPLETE);
+            Object where = Reflector.getObjectField(smsReceiver, "mDeleteWhere");
+            Object args = Reflector.getObjectField(smsReceiver, "mDeleteWhereArgs");
+            if (!(where instanceof String) || ((String) where).isEmpty() || !(args instanceof String[])) return false;
             deleteFromRawTable(inboundSmsHandler, smsReceiver);
+            sendEventBroadcastComplete(inboundSmsHandler);
+            return true;
         } catch (Throwable e) {
-            XLog.e("Error occurs when delete SMS data from raw table", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-
-        sendEventBroadcastComplete(inboundSmsHandler);
+            XLog.e("SMS interception failed; preserve original delivery", e);
+            return false;
+        } finally { Binder.restoreCallingIdentity(token); }
     }
 
     private void sendEventBroadcastComplete(Object inboundSmsHandler) {

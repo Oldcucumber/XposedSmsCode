@@ -191,12 +191,6 @@ public class HomeActivity extends BaseActivity {
 
     @SuppressLint("WorldReadableFiles")
     private void shareXposedPreferences() {
-        try {
-            // EdXposed or LSPosed new SharedPreferences:  https://github.com/LSPosed/LSPosed/wiki/New-SharedPreferences
-            getSharedPreferences(PrefConst.PREF_NAME, Context.MODE_WORLD_READABLE);
-        } catch (SecurityException exception) {
-            // 如果模块没有被 EdXposed 或者 LSPosed 激活，就会走到这里来
-            // ignore
-        }
+        com.tianma.xsmscode.feature.config.ConfigStore.changed();
     }
 }
