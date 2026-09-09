@@ -46,9 +46,14 @@
 # greenDAO 3 proguard start
 ### greenDAO 3
 ### GreenDaoUpgradeHelper
+-keep class * extends org.greenrobot.greendao.AbstractDao { *; }
 -keep class com.tianma.xsmscode.data.db.entity.AppInfoDao { *; }
 -keep class com.tianma.xsmscode.data.db.entity.SmsCodeRuleDao { *; }
 -keep class com.tianma.xsmscode.data.db.entity.SmsMsgDao { *; }
+-keep class com.tianma.xsmscode.data.db.entity.SmsCodeRule { *; }
+-keep class com.tianma.xsmscode.data.db.entity.AppInfo { *; }
+-keep class com.tianma.xsmscode.data.db.entity.SmsMsg { *; }
+-keep class com.tianma.xsmscode.data.http.entity.GithubRelease { *; }
 -keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
     public static java.lang.String TABLENAME;
     public static void dropTable(org.greenrobot.greendao.database.Database, boolean);
@@ -81,6 +86,23 @@
 # jsoup proguard start
 -keeppackagenames org.jsoup.nodes
 # jsoup proguard end
+# ==========================
+
+# ==========================
+# Retrofit service signatures
+# R8 full mode also needs the generic return type retained, otherwise it can
+# erase Observable<T> to raw Observable even when the service is kept.
+-keep,allowoptimization,allowobfuscation class io.reactivex.Observable
+-keep interface com.tianma.xsmscode.data.http.service.GithubService { *; }
+-keep interface com.tianma.xsmscode.data.http.service.CoolApkService { *; }
+# ==========================
+
+# ==========================
+# Gson annotated models
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+    @com.google.gson.annotations.Expose <fields>;
+}
 # ==========================
 
 
