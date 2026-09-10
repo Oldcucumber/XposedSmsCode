@@ -40,7 +40,8 @@ public interface SmsCodeConst {
             "動態代碼" /**/,
     };
 
-    String VERIFICATION_KEYWORDS_REGEX =
+    // Retained verbatim to recognize saved, unmodified defaults without rewriting preferences.
+    String LEGACY_VERIFICATION_KEYWORDS_REGEX =
             /**/            "验证码|校验码|检验码|确认码|激活码|动态码|安全码" +
             /**/            "|验证代码|校验代码|检验代码|激活代码|确认代码|动态代码|安全代码" +
             /**/            "|登入码|认证码|识别码" +
@@ -51,6 +52,18 @@ public interface SmsCodeConst {
             /*English*/     "|Code|code|CODE" +
             /*Russian*/     "|Код|код|КОД|Пароль|пароль|ПАРОЛЬ|Kod|kod|KOD" +
             /*Vietnamese*/  "|Ma|Mã|OTP";
+
+    // Exclude matches inside product names such as CodeGeeX / Mate, but keep
+    // compact forms such as code123456 and Chinese text adjacent to "code".
+    String WORD_LEFT = "(?<![\\p{IsLatin}\\p{IsCyrillic}_])";
+    String WORD_RIGHT = "(?![\\p{IsLatin}\\p{IsCyrillic}_])";
+    String ADDITIONAL_KEYWORDS = "登录码|登陆码|登錄碼|一次性密码|一次性密碼|一次性口令";
+    String VERIFICATION_KEYWORDS_REGEX = LEGACY_VERIFICATION_KEYWORDS_REGEX
+            .replace("|Code|code|CODE", "|" + WORD_LEFT + "(?i:code)" + WORD_RIGHT)
+            .replace("|Код|код|КОД|Пароль|пароль|ПАРОЛЬ|Kod|kod|KOD",
+                    "|" + WORD_LEFT + "(?iu:код|пароль|kod)" + WORD_RIGHT)
+            .replace("|Ma|Mã|OTP", "|" + WORD_LEFT + "(?:Ma|Mã|(?i:otp))" + WORD_RIGHT)
+            + "|" + ADDITIONAL_KEYWORDS;
 
     String[] VERIFICATION_KEY_WORDS_EN = {
             "Code",

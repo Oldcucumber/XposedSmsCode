@@ -2,6 +2,7 @@ package com.tianma.xsmscode.core;
 
 import java.util.*;
 import java.util.regex.*;
+import com.tianma.xsmscode.common.constant.SmsCodeConst;
 
 /** Original scoring and matching semantics, independent of Android and Xposed. */
 public final class CodeParser {
@@ -35,10 +36,37 @@ public final class CodeParser {
             } catch (PatternSyntaxException ignored) { /* A malformed rule must not poison all rules. */ }
         }
         try {
+            // User rules above always see the original body. User-edited keyword
+            // regexes below also retain their original matching semantics.
+            boolean builtIn = SmsCodeConst.LEGACY_VERIFICATION_KEYWORDS_REGEX.equals(keywords)
+                    || SmsCodeConst.VERIFICATION_KEYWORDS_REGEX.equals(keywords);
+            if (builtIn) {
+                keywords = SmsCodeConst.VERIFICATION_KEYWORDS_REGEX;
+                content = maskWebLinks(content);
+            }
             String keyword = parseKeyword(keywords, content);
             if (empty(keyword)) return "";
+            if (builtIn && compile("^(?:" + SmsCodeConst.ADDITIONAL_KEYWORDS + ")$").matcher(keyword).matches()) {
+                // New formats only: do not let legacy scoring prefer a six-digit
+                // transaction/date fragment over the explicitly labelled OTP.
+                Matcher explicit = compile(Pattern.quote(keyword)
+                        + "[\\s:：为為是]{0,8}([A-Za-z0-9]{4,8})(?![A-Za-z0-9])").matcher(content);
+                return explicit.find() ? explicit.group(1) : "";
+            }
             return containsChinese(content) ? getSmsCodeCN(keyword, content) : getSmsCodeEN(keyword, content);
         } catch (PatternSyntaxException | NullPointerException ignored) { return ""; }
+    }
+
+    private static String maskWebLinks(String content) {
+        Matcher links = compile("(?i)(?:https?://|www\\.)[^\\s<>\\\"'\\p{IsHan}，。；！？【】]+")
+                .matcher(content);
+        char[] text = content.toCharArray();
+        while (links.find()) {
+            // Keep offsets and separators: deleting a URL (or replacing it with
+            // spaces) could join surrounding digits in the legacy CN pass.
+            Arrays.fill(text, links.start(), links.end(), '\uFFFC');
+        }
+        return new String(text);
     }
     private static boolean containsChinese(String text) {
         String regex = "[\u4e00-\u9fa5]|。";
