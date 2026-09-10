@@ -44,6 +44,8 @@ public class SmsHandlerHook extends BaseHook {
     private Context mPhoneContext;
     // Plugin App Context
     private Context mPluginContext;
+    private boolean mNotificationChannelReady;
+    private boolean mCopyReceiverReady;
 
     @Override
     public void onLoadPackage(LoadedPackage lpparam) {
@@ -64,6 +66,7 @@ public class SmsHandlerHook extends BaseHook {
         XLog.i("Phone manufacturer: %s", Build.MANUFACTURER);
         XLog.i("Phone model: %s", Build.MODEL);
         XLog.i("Android version: %s", Build.VERSION.RELEASE);
+        XLog.i("Android SDK: %d; build: %s", Build.VERSION.SDK_INT, Build.DISPLAY);
         int xposedVersion;
         try {
             xposedVersion = HookRuntime.getXposedVersion();
@@ -75,7 +78,8 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void hookSmsHandler(ClassLoader classloader) {
-        hookConstructor(classloader);
+        try { hookConstructor(classloader); }
+        catch (Throwable e) { XLog.e("Constructor hook unavailable; try context at SMS dispatch", e); }
         hookDispatchIntent(classloader);
     }
 
@@ -224,6 +228,7 @@ public class SmsHandlerHook extends BaseHook {
         }
         if (target == null) { XLog.e("No supported SMS dispatch signature"); return; }
         XposedWrapper.hookMethod(target, new DispatchIntentHook(receiverIndex));
+        XLog.i("SMS dispatch hook installed: %s", target.toGenericString());
     }
 
     private class ConstructorHook extends HookCallback {
@@ -243,16 +248,19 @@ public class SmsHandlerHook extends BaseHook {
         Context context = null;
         for (Object arg : param.args) if (arg instanceof Context) { context = (Context) arg; break; }
         if (context == null) return;
-        if (mPhoneContext == null) {
-            mPhoneContext = context;
-            try {
-                mPluginContext = mPhoneContext.createPackageContext(SMSCODE_PACKAGE,
-                        Context.CONTEXT_IGNORE_SECURITY);
-                initNotificationChannel();
-                registerCopyCodeReceiver();
-            } catch (Exception e) {
-                XLog.e("Create plugin context failed: %s", e);
-            }
+        initializeContext(context);
+    }
+
+    private synchronized void initializeContext(Context context) {
+        if (mPhoneContext == null) mPhoneContext = context;
+        if (getPluginContext() == null) return;
+        if (!mNotificationChannelReady) {
+            try { initNotificationChannel(); mNotificationChannelReady = true; }
+            catch (Exception e) { XLog.e("Notification channel initialization deferred", e); }
+        }
+        if (!mCopyReceiverReady) {
+            try { registerCopyCodeReceiver(); mCopyReceiverReady = true; }
+            catch (Exception e) { XLog.e("Copy receiver initialization deferred", e); }
         }
     }
 
@@ -290,9 +298,7 @@ public class SmsHandlerHook extends BaseHook {
     }
 
     private void beforeDispatchIntentHandler(HookCallback.MethodHookParam param, int receiverIndex) {
-        if (mPhoneContext == null || !(param.args[0] instanceof Intent)) return;
-        android.os.UserManager users = mPhoneContext.getSystemService(android.os.UserManager.class);
-        if (users == null || !users.isUserUnlocked() || getPluginContext() == null) return;
+        if (!(param.args[0] instanceof Intent)) return;
         Intent intent = (Intent) param.args[0];
         String action = intent.getAction();
 
@@ -301,6 +307,18 @@ public class SmsHandlerHook extends BaseHook {
         if (!Telephony.Sms.Intents.SMS_DELIVER_ACTION.equals(action)) {
             return;
         }
+
+        if (mPhoneContext == null) {
+            Object context = Reflector.getObjectField(param.thisObject, "mContext");
+            if (!(context instanceof Context)) return;
+            initializeContext((Context) context);
+            XLog.i("Recovered phone context at SMS dispatch");
+        }
+        android.os.UserManager users = mPhoneContext.getSystemService(android.os.UserManager.class);
+        if (users == null || !users.isUserUnlocked()) return;
+        if (mPluginContext == null || !mNotificationChannelReady || !mCopyReceiverReady)
+            initializeContext(mPhoneContext);
+        if (mPluginContext == null) return;
 
         ParseResult parseResult = new CodeWorker(getPluginContext(), mPhoneContext, intent).parse();
         if (parseResult != null) {// parse succeed
