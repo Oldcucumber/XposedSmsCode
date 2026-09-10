@@ -13,10 +13,10 @@ android {
         applicationId = 'com.github.tianma8023.xposed.smscode'
         minSdk = 26
         targetSdk = 34
-        versionCode = 53
-        versionName = '2.5.2-legacy-APIupdate.1'
+        versionCode = 54
+        versionName = '2.5.3'
         buildConfigField 'String', 'LOG_TAG', '\"XSmsCode\"'
-        buildConfigField 'int', 'MODULE_VERSION', '53'
+        buildConfigField 'int', 'MODULE_VERSION', '54'
         buildConfigField 'String', 'FORK_REPOSITORY', '\"' + providers.gradleProperty('fork.repository').getOrElse('') + '\"'
         javaCompileOptions.annotationProcessorOptions.arguments = [eventBusIndex: 'com.tianma.xsmscode.data.eventbus.MyEventBusIndex']
     }

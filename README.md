@@ -6,7 +6,9 @@ This repository is maintained by **Oldcucumber** as a compatibility-focused fork
 
 Source and releases: https://github.com/Oldcucumber/XposedSmsCode
 
-The original author attribution and GPLv3 license are retained; original communication and donation links belong to the original author.
+Current release: **2.5.3** — conservative default extraction improvements, API 102 scope/initialization diagnostics, and Release shrinking fixes. [Changes and verification scope](docs/release-2.5.3.md) · [HyperOS troubleshooting](docs/hyperos-compatibility.md).
+
+Thanks to original author **tianma8023**. The original attribution and GPLv3 license are retained. This fork does not request donations.
 
 ![Total Downloads](https://img.shields.io/github/downloads/Oldcucumber/XposedSmsCode/total) ![Total Stars](https://img.shields.io/github/stars/Oldcucumber/XposedSmsCode?style=social) [![Latest Release](https://img.shields.io/github/v/release/Oldcucumber/XposedSmsCode?label=Latest%20Release)](https://github.com/Oldcucumber/XposedSmsCode/releases)
 
@@ -26,16 +28,16 @@ An Xposed module which can recognize, parse SMS code and copy it to clipboard wh
 - ~~[Xposed Repository](http://repo.xposed.info/module/com.github.tianma8023.xposed.smscode)~~
 
 # Usage
-1. Root your device and install Xposed Framework.
-2. Install and activite this xposed module and then reboot.
+1. Root your Android 8.0+ device and install a framework implementing libxposed API 102.
+2. Enable this module for system framework (`system`) and phone (`com.android.phone`), reboot, and open the module app to sync settings.
 3. Enjoy it!
 
 Welcome any feedbacks.
 
 # Attention
 - **This module is suitable for AOSP ROM, it may not work well on other 3rd-party Rom.**
-- **Compatibility: Requires Android 6.0+ (api level ≥ 23).**
-- **Support Xposed, EdXposed, LSPosed and TaiChi·Magisk**
+- **Compatibility: Requires Android 8.0+ (API ≥ 26) and libxposed API 102. HyperOS 4 still requires device verification.**
+- **Legacy Xposed, EdXposed and TaiChi are not supported by this fork.**
 - **Read the FAQ in app first if you encounter any problems.**
 
 # Features

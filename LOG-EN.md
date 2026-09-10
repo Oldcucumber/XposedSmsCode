@@ -1,4 +1,9 @@
 # Update Logs
+- 26.09.10 v2.5.3 Reboot required
+  1. Reduce default keyword/URL false positives and support additional OTP labels; preserve custom rule precedence.
+  2. Include API 102 system scope, initialization recovery, module logging and Release shrinking fixes.
+  3. Match APK/release versions and require regression tests and signature verification. HyperOS 4 remains unverified on hardware.
+  4. [Detailed changes and validation scope (Chinese)](docs/release-2.5.3.md)
 - 24.01.05 v2.5.1 Reboot required
   1. Fix: the issue of cannot show sms notification on Android 14 @klxiaoniu
   2. Fix: the issue of cannot open the webpage for viewing the source code
