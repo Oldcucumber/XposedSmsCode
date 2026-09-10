@@ -4,13 +4,22 @@ import android.util.Log;
 
 import com.github.tianma8023.xposed.smscode.BuildConfig;
 
-import com.tianma.xsmscode.xp.modern.HookRuntime;
-
 public class XLog {
 
     private static final String LOG_TAG = BuildConfig.LOG_TAG;
     private static int sLogLevel = BuildConfig.LOG_LEVEL;
     private static final boolean LOG_TO_XPOSED = BuildConfig.LOG_TO_XPOSED;
+    private static volatile FrameworkLogger frameworkLogger;
+
+    // The standalone app has no libxposed API classes. Install this bridge only
+    // from the module entry, rather than loading HookRuntime from app logging.
+    public interface FrameworkLogger {
+        void log(int priority, String tag, String message);
+    }
+
+    public static void setFrameworkLogger(FrameworkLogger logger) {
+        frameworkLogger = logger;
+    }
 
     private XLog() {
     }
@@ -32,8 +41,14 @@ public class XLog {
 
         // Duplicate to the Xposed log if enabled
         if (LOG_TO_XPOSED) {
-            // only log to LSPosed
-            Log.println(priority, "LSPosed-Bridge", LOG_TAG + ": " + message);
+            FrameworkLogger logger = frameworkLogger;
+            if (logger != null) {
+                try { logger.log(priority, LOG_TAG, message); }
+                catch (RuntimeException | LinkageError error) {
+                    // Logging failures must not disrupt SMS delivery or app startup.
+                    Log.e(LOG_TAG, "Framework logging unavailable", error);
+                }
+            }
         }
     }
 
